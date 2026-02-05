@@ -19,5 +19,13 @@ def phonk():
 def calc():
     return render_template("calc.html")
 
+@app.route("/graphing_calc")
+def graphing_calc():
+    return render_template("graphing_calc.html")
+
+@app.route("/cm_files")
+def cm_files():
+    return render_template("cm_files.html")
+
 if __name__ == "__main__":
     app.run(debug=True)

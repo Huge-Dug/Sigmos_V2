@@ -2,6 +2,7 @@ math.config({
   number: 'BigNumber',
   precision: 64
 });
+
 document.addEventListener('DOMContentLoaded', () => {
 
     const clear = document.getElementById('clear')
@@ -49,7 +50,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (answer !== null) {
 
             if(answer.toString() == "Infinity" || answer.toString() == "-Infinity") {
-                alert("BOII I AIN\'T DOIN TS!")
+                alert("BOII TS IS INFINITE")
             }
 
             localStorage.setItem('PreviousAnswer', answer)
@@ -72,7 +73,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         mathToDo = mathToDo.replaceAll(' ', '')
         mathToDo = mathToDo.replaceAll('mod', '%')
-        mathToDo = mathToDo.replaceAll('^', '**')
         mathToDo = mathToDo.replaceAll('√', 'sqrt')
         mathToDo = mathToDo.replaceAll('π', 'pi')
 
@@ -121,9 +121,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (back) back.addEventListener('click', () => {
         mathInput.value = mathInput.value.slice(0, -1)
-    })
-
-    
+    })  
 
     if (answer) answer.addEventListener('click', () => {
         if (previousAnswer !== null) {

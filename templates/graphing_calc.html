@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block title %}Graphing Calculator{% endblock %}
+
+{% block content %}
+
+<div class="container">
+    <div class="where_you_put_math">
+        <div style="display: flex; height: 7.5%;">
+            <input class="graphing-calc-text" type="text" id="where_the_math_goes" placeholder="Put math here...">
+            <button class="graph-btn" id="graph-btn">Graph</button>
+        </div>
+    </div>
+    <div class="graphing_graph_thing">
+        <canvas id="graphing-calc-canvas" class="graphing-calc-canvas">
+        </canvas>
+</div>
+
+<script type="module" src="{{ url_for('static', filename='js/graphThing.js') }}"></script>
+
+{% endblock %}
