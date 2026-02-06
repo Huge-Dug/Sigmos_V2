@@ -27,5 +27,9 @@ def graphing_calc():
 def cm_files():
     return render_template("cm_files.html")
 
+@app.route("/67")
+def sixty_seven():
+    return render_template("67.html")
+
 if __name__ == "__main__":
     app.run(debug=True)

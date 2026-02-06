@@ -3,6 +3,21 @@ document.addEventListener('DOMContentLoaded', () => {
     const canvas = document.getElementById('graphing-calc-canvas');
     const ctx = canvas.getContext('2d');
     const graph = document.getElementById("graphing-calc-canvas");
+    const addNewItemButton = document.getElementById("add_new_item");
+
+    let amountOfInserts = 1;
+
+    let itemsGraphed = {
+
+        "Points": [
+
+        ],
+
+        "Lines": [
+
+        ],
+    
+    };
 
     function resizeCanvasToParent() {
         const parent = canvas.parentElement;
@@ -24,7 +39,7 @@ document.addEventListener('DOMContentLoaded', () => {
     var width = canvas.width;
     var height = canvas.height;
     var ratio = 3/2;
-    var baseSize = 30;
+    var baseSize = 17;
     var squareSizeX = width / (baseSize * ratio);
     var squareSizeY = height / baseSize;
     
@@ -49,9 +64,6 @@ document.addEventListener('DOMContentLoaded', () => {
     let realOriginX = width / 2 + offsetX;
     let realOriginY = height / 2 + offsetY;
 
-    var amountOfExtraLinesX = 0;
-    var amountOfExtraLinesY = 0;
-
     function drawGrid() {
 
         ctx.strokeStyle = '#000000';
@@ -68,7 +80,6 @@ document.addEventListener('DOMContentLoaded', () => {
             ctx.stroke();
         }
 
-       
         const startY = Math.floor((-offsetY) / squareSizeY);
         const endY = Math.ceil((height - offsetY) / squareSizeY);
 
@@ -79,13 +90,12 @@ document.addEventListener('DOMContentLoaded', () => {
             ctx.lineTo(width, yPos);
             ctx.stroke();
         }
-       
-
-        
 
         ctx.beginPath();
         ctx.arc(realOriginX, realOriginY, squareSizeX / 2, 0, 360);
         ctx.stroke();
+
+        ctx.lineWidth = 2;
 
         ctx.beginPath();
         ctx.moveTo((width / 2) + offsetX, height);
@@ -98,6 +108,10 @@ document.addEventListener('DOMContentLoaded', () => {
         ctx.lineTo(width, (height / 2) + offsetY);
         ctx.strokeStyle = '#ff0000';
         ctx.stroke();
+
+        ctx.lineWidth = 1;
+
+        itemCheck();
 
     };
     
@@ -125,13 +139,78 @@ document.addEventListener('DOMContentLoaded', () => {
     function refreshCanvas() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         drawGrid();
+        itemCheck();
     }
 
     refreshCanvas();
-    
 
+    function readdListeners() {
+        for (let i = 1; i <= amountOfInserts; i++) {
+            const input = document.getElementById(`where_the_math_goes_${i}`);
+
+            input.addEventListener('input', () => {
+                refreshCanvas();
+
+                if (input.value) {
+
+                    try {
+                        var array = JSON.parse("[" + input.value + "]");
+                    }
+
+                    catch (e) {
+                        var array = null;
+                    }
+
+                    if(array != null) {
+                        plotPoint(array[0], array[1])
+                    }
+                }
+                
+            });
+        }
+    }
+
+
+    function itemCheck() {
+        for (let i = 1; i <= amountOfInserts; i++) {
+            const input = document.getElementById(`where_the_math_goes_${i}`);
+
+            if (input.value) {
+
+                try {
+                    var array = JSON.parse("[" + input.value + "]");
+                }
+
+                catch (e) {
+                    var array = null;
+                }
+
+                if(array != null) {
+                    plotPoint(array[0], array[1])
+                }
+            }
+                
+            
+        }
+    }
+
+    readdListeners();
+
+    addNewItemButton.addEventListener('click', () => {
+        amountOfInserts = amountOfInserts + 1;
+        const whereYouPutMath = document.querySelector('.where_you_put_math');
+        const newDiv = document.createElement('div');
+        newDiv.style.display = 'flex';
+        newDiv.style.height = '15%';
+        newDiv.innerHTML = `<h2 class="whatever_this_thing_is_called">${amountOfInserts}</h2><input class="graphing-calc-text" type="text" id="where_the_math_goes_${amountOfInserts}" placeholder="...">`;
+        whereYouPutMath.insertBefore(newDiv, addNewItemButton);
+
+        readdListeners();
+    });
+    
     window.addEventListener('resize', () => {
         refreshCanvas();
+        itemCheck();
     });
 
     var isDragging = false;
@@ -174,35 +253,20 @@ document.addEventListener('DOMContentLoaded', () => {
         canvas.style.cursor = 'grabbing';
         
         refreshCanvas();
+
+        itemCheck();
+
     }
 
     function onMouseUp(event) {
         isDragging = false;
         canvas.style.cursor = 'grab';
+        itemCheck();
     }
-
 
     canvas.addEventListener('mousedown', onMouseDown);
     canvas.addEventListener('mousemove', onMouseMove);
     canvas.addEventListener('mouseup', onMouseUp);
     canvas.addEventListener('mouseout', onMouseUp)
-
-    document.getElementById("where_the_math_goes").addEventListener('input', () => {
-        refreshCanvas();
-        if (document.getElementById("where_the_math_goes").value) {
-
-            try {
-                var array = JSON.parse("[" + document.getElementById("where_the_math_goes").value + "]");
-            }
-
-            catch (e) {
-                var array = null;
-            }
-
-            if(array != null) {
-                plotPoint(array[0], array[1])
-            }
-        }
-    });
 
 });
