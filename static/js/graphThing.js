@@ -1,5 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
 
+    // STUPID GRAPH SETUP
+
     const canvas = document.getElementById('graphing-calc-canvas');
     const ctx = canvas.getContext('2d');
     const graph = document.getElementById("graphing-calc-canvas");
@@ -7,17 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let amountOfInserts = 1;
 
-    let itemsGraphed = {
-
-        "Points": [
-
-        ],
-
-        "Lines": [
-
-        ],
-    
-    };
+    // RESIZE HANDLING
 
     function resizeCanvasToParent() {
         const parent = canvas.parentElement;
@@ -31,40 +23,48 @@ document.addEventListener('DOMContentLoaded', () => {
         canvas.height = Math.floor(rect.height * scale);
 
         ctx.setTransform(scale, 0, 0, scale, 0, 0);
+        
     }
 
     resizeCanvasToParent();
+
     window.addEventListener('resize', resizeCanvasToParent);
+
+    // STUPID MATH THAT I HATE
 
     var width = canvas.width;
     var height = canvas.height;
-    var ratio = 3/2;
-    var baseSize = 17;
+    const ratio = 3/2;
+    var baseSize = 20;
     var squareSizeX = width / (baseSize * ratio);
     var squareSizeY = height / baseSize;
-    
-
-    var amountOfSquaresX = width / squareSizeX;
-    var amountOfSquaresY = height / squareSizeY;
-
-    if( amountOfSquaresX % 2 != 0 || amountOfSquaresY % 2 != 0 ) {
-        while( amountOfSquaresX % 2 != 0 || amountOfSquaresY % 2 != 0 ) {
-            baseSize = baseSize + 1;
-            squareSizeX = width / (baseSize * ratio);
-            squareSizeY = height / baseSize;
-            amountOfSquaresX = width / squareSizeX;
-            amountOfSquaresY = height / squareSizeY;
-        }
-    }
-
-    console.log(baseSize, squareSizeX, squareSizeY);
 
     let offsetX = 0;
     let offsetY = 0;
     let realOriginX = width / 2 + offsetX;
     let realOriginY = height / 2 + offsetY;
 
-    function drawGrid() {
+    // DRAWING THE GRAPH GRID
+
+    function drawGrid(direction) {
+
+        var amountOfSquaresX = width / squareSizeX;
+        var amountOfSquaresY = height / squareSizeY;
+
+        baseSize = baseSize + direction;
+
+        squareSizeX = width / (baseSize * ratio);
+        squareSizeY = height / baseSize;
+        amountOfSquaresX = width / squareSizeX;
+        amountOfSquaresY = height / squareSizeY;
+
+        while (amountOfSquaresX % 2 != 0 || amountOfSquaresY % 2 != 0) {
+            baseSize = baseSize + direction;
+            squareSizeX = width / (baseSize * ratio);
+            squareSizeY = height / baseSize;
+            amountOfSquaresX = width / squareSizeX;
+            amountOfSquaresY = height / squareSizeY;
+        }
 
         ctx.strokeStyle = '#000000';
         ctx.lineWidth = 1;
@@ -75,6 +75,7 @@ document.addEventListener('DOMContentLoaded', () => {
         for (let x = startX; x <= endX; x++) {
             const xPos = x * squareSizeX + offsetX;
             ctx.beginPath();
+            ctx.strokeStyle = '#2b2b2b';
             ctx.moveTo(xPos, 0);
             ctx.lineTo(xPos, height);
             ctx.stroke();
@@ -86,111 +87,128 @@ document.addEventListener('DOMContentLoaded', () => {
         for (let y = startY; y <= endY; y++) {
             const yPos = y * squareSizeY + offsetY;
             ctx.beginPath();
+            ctx.strokeStyle = '#2b2b2b';
             ctx.moveTo(0, yPos);
             ctx.lineTo(width, yPos);
             ctx.stroke();
         }
 
+        ctx.lineWidth = 3;
+
+        /*
         ctx.beginPath();
         ctx.arc(realOriginX, realOriginY, squareSizeX / 2, 0, 360);
+        ctx.strokeStyle = 'rgb(26, 94, 220)';
         ctx.stroke();
-
-        ctx.lineWidth = 2;
+        */
 
         ctx.beginPath();
         ctx.moveTo((width / 2) + offsetX, height);
         ctx.lineTo((width / 2 + offsetX), 0);
-        ctx.strokeStyle = '#00ff00';
+        ctx.strokeStyle = 'rgb(0, 0, 0)';;
         ctx.stroke();
 
         ctx.beginPath();
         ctx.moveTo(0, (height / 2) + offsetY);
         ctx.lineTo(width, (height / 2) + offsetY);
-        ctx.strokeStyle = '#ff0000';
+        ctx.strokeStyle = 'rgb(0, 0, 0)';
         ctx.stroke();
 
         ctx.lineWidth = 1;
+    }
 
-        itemCheck();
+    // CONVERT THE STUPID SCREEN CORDS
 
-    };
-    
     function convertToCanvasCoords(x, y) {
         x = realOriginX + (x * squareSizeX);
         y = realOriginY - (y * squareSizeY);
-        return [x, y]
+        return [x, y];
     }
 
-    function plotPoint(x, y) {
+    // DRAW DOTS
 
-        const realCords = convertToCanvasCoords(x, y)
+    function plotPoint(x, y) {
+        const realCords = convertToCanvasCoords(x, y);
 
         ctx.beginPath();
         ctx.arc(realCords[0], realCords[1], squareSizeX / 4, 0, 360);
+        ctx.lineWidth = 2;
         ctx.strokeStyle = '#001aff';
         ctx.fillStyle = '#ffffff';
         ctx.fill();
         ctx.stroke();
-
+        ctx.lineWidth = 1;
     }
+
+    // REFRESH THE STUIPD GRAPH
+
+    // Ok so idk what I was on when I wrote this but holy crap it sucks.
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    function refreshCanvas() {
+    function drawLine(x1, y1, x2, y2) {
+        let startingCords = convertToCanvasCoords(x1, y1);
+        let endingCords = convertToCanvasCoords(x2, y2);
+        
+        ctx.beginPath();
+        ctx.lineWidth = 3;
+        ctx.moveTo(startingCords[0], startingCords[1]);
+        ctx.lineTo(endingCords[0], endingCords[1]);
+        ctx.strokeStyle = 'rgb(26, 94, 220)';
+        ctx.stroke();
+    }
+
+    function refreshCanvas(direction = 0) {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        drawGrid();
+        drawGrid(direction);
         itemCheck();
     }
 
-    refreshCanvas();
+    refreshCanvas(1);
+
+    // INPUT HANDLING
 
     function readdListeners() {
         for (let i = 1; i <= amountOfInserts; i++) {
             const input = document.getElementById(`where_the_math_goes_${i}`);
 
             input.addEventListener('input', () => {
-                refreshCanvas();
+                refreshCanvas(0);
 
                 if (input.value) {
-
                     try {
                         var array = JSON.parse("[" + input.value + "]");
-                    }
-
-                    catch (e) {
+                    } catch (e) {
                         var array = null;
                     }
 
-                    if(array != null) {
-                        plotPoint(array[0], array[1])
+                    if (array != null) {
+                        plotPoint(array[0], array[1]);
                     }
                 }
-                
             });
         }
     }
 
+    
 
     function itemCheck() {
         for (let i = 1; i <= amountOfInserts; i++) {
             const input = document.getElementById(`where_the_math_goes_${i}`);
 
             if (input.value) {
-
                 try {
                     var array = JSON.parse("[" + input.value + "]");
-                }
-
+                } 
+                
                 catch (e) {
                     var array = null;
                 }
 
-                if(array != null) {
-                    plotPoint(array[0], array[1])
+                if (array != null) {
+                    plotPoint(array[0], array[1]);
                 }
             }
-                
-            
         }
     }
 
@@ -199,19 +217,17 @@ document.addEventListener('DOMContentLoaded', () => {
     addNewItemButton.addEventListener('click', () => {
         amountOfInserts = amountOfInserts + 1;
         const whereYouPutMath = document.querySelector('.where_you_put_math');
-        const newDiv = document.createElement('div');
-        newDiv.style.display = 'flex';
-        newDiv.style.height = '15%';
-        newDiv.innerHTML = `<h2 class="whatever_this_thing_is_called">${amountOfInserts}</h2><input class="graphing-calc-text" type="text" id="where_the_math_goes_${amountOfInserts}" placeholder="...">`;
-        whereYouPutMath.insertBefore(newDiv, addNewItemButton);
+        const againWithTheBlocks = document.createElement('div');
+        againWithTheBlocks.style.display = 'flex';
+        againWithTheBlocks.style.height = '15%';
+        againWithTheBlocks.style.width = '100%';
+        againWithTheBlocks.innerHTML = `<h2 class="whatever_this_thing_is_called">${amountOfInserts}</h2><input class="graphing-calc-text" type="text" id="where_the_math_goes_${amountOfInserts}" placeholder="...">`;
+        whereYouPutMath.insertBefore(againWithTheBlocks, addNewItemButton);
 
         readdListeners();
     });
-    
-    window.addEventListener('resize', () => {
-        refreshCanvas();
-        itemCheck();
-    });
+
+    // MOUSE STUFF
 
     var isDragging = false;
     var originalXPos = 0;
@@ -229,7 +245,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function onMouseMove(event) {
-
         if (!isDragging) return;
 
         rect = canvas.getBoundingClientRect();
@@ -248,14 +263,9 @@ document.addEventListener('DOMContentLoaded', () => {
         realOriginX = width / 2 + offsetX;
         realOriginY = height / 2 + offsetY;
 
-        console.log(offsetX, offsetY)
-
         canvas.style.cursor = 'grabbing';
-        
-        refreshCanvas();
 
-        itemCheck();
-
+        refreshCanvas(0);
     }
 
     function onMouseUp(event) {
@@ -264,9 +274,35 @@ document.addEventListener('DOMContentLoaded', () => {
         itemCheck();
     }
 
+    function onScrollOut() {
+        baseSize = baseSize + 1;
+        refreshCanvas(1);
+        console.log(baseSize);
+    }
+
+    function onScrollIn() {
+        if (baseSize > 1) {
+            baseSize = baseSize - 1;
+            refreshCanvas(-1);
+        }
+        console.log(baseSize);
+    }
+
     canvas.addEventListener('mousedown', onMouseDown);
     canvas.addEventListener('mousemove', onMouseMove);
     canvas.addEventListener('mouseup', onMouseUp);
-    canvas.addEventListener('mouseout', onMouseUp)
+    canvas.addEventListener('mouseout', onMouseUp);
+
+    canvas.addEventListener('wheel', (event) => {
+        event.preventDefault();
+
+        if (event.deltaY > 0) {
+            onScrollOut();
+        } 
+        
+        else {
+            onScrollIn();
+        }
+    });
 
 });
