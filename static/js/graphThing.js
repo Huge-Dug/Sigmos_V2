@@ -207,7 +207,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 if (array != null) {
                     plotPoint(array[0], array[1]);
+                    return
                 }
+
             }
         }
     }
@@ -243,6 +245,9 @@ document.addEventListener('DOMContentLoaded', () => {
         originalYPos = event.clientY - rect.top;
         canvas.style.cursor = 'grabbing';
     }
+
+    addNewItemButton.style.cursor = 'pointer';
+
 
     function onMouseMove(event) {
         if (!isDragging) return;
