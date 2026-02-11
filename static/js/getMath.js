@@ -85,7 +85,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const bn = math.bignumber(x);
         const eps = math.bignumber('1e-30');
         return math.smaller(math.abs(bn), eps) ? math.bignumber(0) : bn;
-}
+    }
 
     if (clear) clear.addEventListener('click', () => {
         mathInput.value = ''

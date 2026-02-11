@@ -1,3 +1,28 @@
+import { getEquationTypeFromInput } from "./graphHelper.mjs"; 
+
+math.config({
+  number: 'BigNumber',
+  precision: 64
+});
+
+function makeGood(x) {
+        const bn = math.bignumber(x);
+        const eps = math.bignumber('1e-30');
+        return math.smaller(math.abs(bn), eps) ? math.bignumber(0) : bn;
+}
+
+function doMath(mathToDo) {
+
+        mathToDo = mathToDo.replaceAll(' ', '')
+        mathToDo = mathToDo.replaceAll('mod', '%')
+        mathToDo = mathToDo.replaceAll('√', 'sqrt')
+        mathToDo = mathToDo.replaceAll('π', 'pi')
+
+        console.log(mathToDo)
+        return mathToDo
+    
+}
+
 document.addEventListener('DOMContentLoaded', () => {
 
     // STUPID GRAPH SETUP
@@ -38,6 +63,8 @@ document.addEventListener('DOMContentLoaded', () => {
     var baseSize = 20;
     var squareSizeX = width / (baseSize * ratio);
     var squareSizeY = height / baseSize;
+    var amountOfSquaresX = width / squareSizeX
+    var amountOfSquaresY = height / squareSizeY
 
     let offsetX = 0;
     let offsetY = 0;
@@ -47,9 +74,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // DRAWING THE GRAPH GRID
 
     function drawGrid(direction) {
-
-        var amountOfSquaresX = width / squareSizeX;
-        var amountOfSquaresY = height / squareSizeY;
 
         baseSize = baseSize + direction;
 
@@ -170,45 +194,94 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function readdListeners() {
         for (let i = 1; i <= amountOfInserts; i++) {
+            
             const input = document.getElementById(`where_the_math_goes_${i}`);
 
-            input.addEventListener('input', () => {
-                refreshCanvas(0);
+            input.addEventListener("input", () => {
+                refreshCanvas(0)
 
-                if (input.value) {
-                    try {
-                        var array = JSON.parse("[" + input.value + "]");
-                    } catch (e) {
-                        var array = null;
-                    }
+                let information = getEquationTypeFromInput(input.value.toString())
 
-                    if (array != null) {
-                        plotPoint(array[0], array[1]);
-                    }
+                if(information == "invalid") {return}
+                if(!(Array.isArray(information))) {return}
+
+                if (information[0] == 'point') {
+                    plotPoint(information[1], information[2])
                 }
+
+                else if (information[0] == "LSFY") {
+
+                    let minXVisible = math.floor((-amountOfSquaresX / 2) - (math.floor(offsetX / squareSizeX)))
+                    let minYVisible = math.floor((-amountOfSquaresY / 2) + (math.floor(offsetY / squareSizeY)))
+                    let maxXVisible = math.floor((amountOfSquaresX / 2) - (math.floor(offsetX / squareSizeX)))
+                    let maxYVisible = math.floor((amountOfSquaresY / 2) + (math.floor(offsetY / squareSizeY)))
+                    
+                    let lastPoint = null
+
+                    for(let x = minXVisible; x <= maxXVisible; x++) {
+                        
+                        let xEquation = information[2].replaceAll("x", "(" + x.toString() + ")")
+                        
+                        let y = makeGood(math.evaluate(doMath(xEquation)))
+                        
+                        if (lastPoint == null) {
+                            lastPoint = [x, y]
+                            continue
+                        }
+
+                        drawLine(lastPoint[0], lastPoint[1], x, y)
+                        lastPoint = [x, y]
+
+                    }
+
+                }
+            
             });
         }
-    }
-
+    }    
     
 
     function itemCheck() {
         for (let i = 1; i <= amountOfInserts; i++) {
             const input = document.getElementById(`where_the_math_goes_${i}`);
 
-            if (input.value) {
-                try {
-                    var array = JSON.parse("[" + input.value + "]");
-                } 
+            let information = getEquationTypeFromInput(input.value.toString())
+
+            if(information == "invalid") {return}
+            if(!(Array.isArray(information))) {return}
+
+            console.log(information)
+
+            if (information[0] == 'point') {
+                plotPoint(information[1], information[2])
+            }
+
+            else if (information[0] == "LSFY") {
+
+                let minXVisible = math.floor((-amountOfSquaresX / 2) - (math.floor(offsetX / squareSizeX)))
+                let minYVisible = math.floor((-amountOfSquaresY / 2) + (math.floor(offsetY / squareSizeY)))
+                let maxXVisible = math.floor((amountOfSquaresX / 2) - (math.floor(offsetX / squareSizeX)))
+                let maxYVisible = math.floor((amountOfSquaresY / 2) + (math.floor(offsetY / squareSizeY)))
                 
-                catch (e) {
-                    var array = null;
+                let lastPoint = null
+
+                for(let x = minXVisible; x <= maxXVisible; x++) {
+                    
+                    let xEquation = information[2].replaceAll("x", "(" + x.toString() + ")")
+                    
+                    let y = makeGood(math.evaluate(doMath(xEquation)))
+                        
+                    if (lastPoint == null) {
+                        lastPoint = [x, y]
+                        continue
+                    }
+
+                    drawLine(lastPoint[0], lastPoint[1], x, y)
+                    lastPoint = [x, y]
+
                 }
 
-                if (array != null) {
-                    plotPoint(array[0], array[1]);
-                    return
-                }
+                
 
             }
         }

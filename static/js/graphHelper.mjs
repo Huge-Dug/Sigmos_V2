@@ -1,0 +1,105 @@
+math.config({
+  number: 'BigNumber',
+  precision: 64
+});
+
+function makeGood(x) {
+        const bn = math.bignumber(x);
+        const eps = math.bignumber('1e-30');
+        return math.smaller(math.abs(bn), eps) ? math.bignumber(0) : bn;
+}
+
+function doMath(mathToDo) {
+
+        mathToDo = mathToDo.replaceAll(' ', '')
+        mathToDo = mathToDo.replaceAll('mod', '%')
+        mathToDo = mathToDo.replaceAll('√', 'sqrt')
+        mathToDo = mathToDo.replaceAll('π', 'pi')
+
+        console.log(mathToDo)
+        return mathToDo
+    
+}
+
+export function getEquationTypeFromInput(equation) {
+
+    var eq = equation
+
+    if(!(typeof equation === 'string')) {
+        return "invalid"
+    }
+
+    for (var i = 0; i < eq.length; i++) {
+        if (eq[i] === ' ') {
+            eq = eq.slice(0, i) + eq.slice(i + 1);
+            i--;
+        }
+    }
+
+    try {
+        var points = eq.split(",")
+        if (points.length == 2) {
+
+            var x = makeGood(math.evaluate(doMath(points[0])))
+            var y = makeGood(math.evaluate(doMath(points[1])))
+            
+            console.log(['point', x, y])
+            return ['point', x, y]
+        }
+    }
+
+    catch {
+
+    }
+
+    if (eq.includes('=')) {
+
+        var eqSplit = eq.split('=');
+
+        if (eqSplit.length > 2) { return 'invalid'; }
+
+        var containsY = eq.includes("y")
+        var containsX = eq.includes("x")
+
+        if(!containsX && !containsY) { return 'invalid'}
+        if((eqSplit[0].includes("y") && eqSplit[1].includes("y")) || (eqSplit[0].includes("x") && eqSplit[1].includes("x"))) {
+            return "invalid"
+        }
+
+        var sideWithX = null
+        var sideWithY = null
+        var sideWithNoX = null
+        var sideWithNoY = null
+        
+        if(containsX) {
+            if(eqSplit[0].includes("x")) {sideWithX = eqSplit[0]; sideWithNoX = eqSplit[1]}
+            else if(eqSplit[1].includes("x")) {sideWithX = eqSplit[1]; sideWithNoX = eqSplit[0]}
+        }
+
+        if(containsY) {
+            if(eqSplit[0].includes("y")) {sideWithY = eqSplit[0]; sideWithNoY = eqSplit[1]}
+            else if(eqSplit[1].includes("y")) {sideWithY = eqSplit[1]; sideWithNoY = eqSplit[0]}
+        }
+
+        if(sideWithX == sideWithY) {
+            return ["STOSS", eqSplit[0], eqSplit[1]]
+        }
+
+        else {
+            if(containsY && containsX) {
+                return ["LSFY", sideWithY, sideWithX]
+            }
+
+            else if(containsY) {
+                return ["LSFYNX", sideWithY, sideWithNoY]
+            }
+
+            else if(containsX) {
+                return ["LSFXNY", sideWithX, sideWithNoX]
+            }
+     
+        }
+    }
+}
+
+        
