@@ -1,8 +1,7 @@
 import { getEquationTypeFromInput } from "./graphHelper.mjs"; 
 
 math.config({
-  number: 'BigNumber',
-  precision: 64
+  number: 'number'
 });
 
 function makeGood(x) {
@@ -181,6 +180,7 @@ document.addEventListener('DOMContentLoaded', () => {
         ctx.strokeStyle = 'rgb(26, 94, 220)';
         ctx.stroke();
     }
+    
 
     function refreshCanvas(direction = 0) {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -189,6 +189,61 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     refreshCanvas(1);
+
+    function graphLineFromInfo(information) {
+
+        let minXVisible = math.ceil((-amountOfSquaresX / 2) - (math.floor(offsetX / squareSizeX)))
+        let minYVisible = math.ceil((-amountOfSquaresY / 2) + (math.floor(offsetY / squareSizeY)))
+        let maxXVisible = math.ceil((amountOfSquaresX / 2) - (math.floor(offsetX / squareSizeX)))
+        let maxYVisible = math.ceil((amountOfSquaresY / 2) + (math.floor(offsetY / squareSizeY)))
+
+        if (information[0] == 'point') {
+            plotPoint(information[1], information[2])
+            return
+        }
+
+        // So they forced me to use the stupid calc thing that was made by Epstein probably...
+
+        else if (information[0] == "LSFY") {
+
+            const soThatJSdoesntKillMe = doMath(information[2]);
+
+            let lastPoint = null
+
+            let step = Math.max(0.01, 2 / squareSizeX);
+
+            for(let x = minXVisible - 2; x <= maxXVisible; x += step) {
+                        
+                let xEquation = soThatJSdoesntKillMe.replaceAll("x", "(" + x.toString() + ")")
+                        
+                try {
+
+                    let y = math.evaluate(xEquation);
+
+                    // The AI recommended !isFinite, js roll with it...
+                            
+                    if (isNaN(y) || !isFinite(y)) {
+                        lastPoint = null;
+                        continue;
+                    }
+                            
+                    if (lastPoint == null) {
+                        lastPoint = [x, y]
+                        continue
+                    }
+
+                    drawLine(lastPoint[0], lastPoint[1], x, y)
+                    lastPoint = [x, y]
+                } 
+                
+                catch (e) {
+                    lastPoint = null;
+                }
+
+            }
+
+        }
+    }
 
     // INPUT HANDLING
 
@@ -205,38 +260,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if(information == "invalid") {return}
                 if(!(Array.isArray(information))) {return}
 
-                if (information[0] == 'point') {
-                    plotPoint(information[1], information[2])
-                }
-
-                else if (information[0] == "LSFY") {
-
-                    //No need to fix this bruh
-
-                    let minXVisible = math.ceil((-amountOfSquaresX / 2) - (math.floor(offsetX / squareSizeX)))
-                    let minYVisible = math.ceil((-amountOfSquaresY / 2) + (math.floor(offsetY / squareSizeY)))
-                    let maxXVisible = math.ceil((amountOfSquaresX / 2) - (math.floor(offsetX / squareSizeX)))
-                    let maxYVisible = math.ceil((amountOfSquaresY / 2) + (math.floor(offsetY / squareSizeY)))
-                    
-                    let lastPoint = null
-
-                    for(let x = minXVisible; x <= maxXVisible; x++) {
-                        
-                        let xEquation = information[2].replaceAll("x", "(" + x.toString() + ")")
-                        
-                        let y = makeGood(math.evaluate(doMath(xEquation)))
-                        
-                        if (lastPoint == null) {
-                            lastPoint = [x, y]
-                            continue
-                        }
-
-                        drawLine(lastPoint[0], lastPoint[1], x, y)
-                        lastPoint = [x, y]
-
-                    }
-
-                }
+                graphLineFromInfo(information)
             
             });
         }
@@ -252,40 +276,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if(information == "invalid") {return}
             if(!(Array.isArray(information))) {return}
 
-            console.log(information)
-
-            if (information[0] == 'point') {
-                plotPoint(information[1], information[2])
-            }
-
-            else if (information[0] == "LSFY") {
-
-                let minXVisible = math.ceil((-amountOfSquaresX / 2) - (math.floor(offsetX / squareSizeX)))
-                let minYVisible = math.ceil((-amountOfSquaresY / 2) + (math.floor(offsetY / squareSizeY)))
-                let maxXVisible = math.ceil((amountOfSquaresX / 2) - (math.floor(offsetX / squareSizeX)))
-                let maxYVisible = math.ceil((amountOfSquaresY / 2) + (math.floor(offsetY / squareSizeY)))
-                
-                let lastPoint = null
-
-                for(let x = minXVisible; x <= maxXVisible; x++) {
-                    
-                    let xEquation = information[2].replaceAll("x", "(" + x.toString() + ")")
-                    
-                    let y = makeGood(math.evaluate(doMath(xEquation)))
-                        
-                    if (lastPoint == null) {
-                        lastPoint = [x, y]
-                        continue
-                    }
-
-                    drawLine(lastPoint[0], lastPoint[1], x, y)
-                    lastPoint = [x, y]
-
-                }
-
-                
-
-            }
+            graphLineFromInfo(information)
         }
     }
 
