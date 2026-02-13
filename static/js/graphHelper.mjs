@@ -16,7 +16,6 @@ function doMath(mathToDo) {
         mathToDo = mathToDo.replaceAll('√', 'sqrt')
         mathToDo = mathToDo.replaceAll('π', 'pi')
 
-        console.log(mathToDo)
         return mathToDo
     
 }
@@ -43,7 +42,6 @@ export function getEquationTypeFromInput(equation) {
             var x = makeGood(math.evaluate(doMath(points[0])))
             var y = makeGood(math.evaluate(doMath(points[1])))
             
-            console.log(['point', x, y])
             return ['point', x, y]
         }
     }

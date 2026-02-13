@@ -19,7 +19,6 @@ function doMath(mathToDo) {
 
         console.log(mathToDo)
         return mathToDo
-    
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -65,10 +64,12 @@ document.addEventListener('DOMContentLoaded', () => {
     var amountOfSquaresX = width / squareSizeX
     var amountOfSquaresY = height / squareSizeY
 
-    let offsetX = 0;
-    let offsetY = 0;
-    let realOriginX = width / 2 + offsetX;
-    let realOriginY = height / 2 + offsetY;
+    const listOfColors = ["rgb(26, 94, 220)", "rgb(26, 220, 107)", "rgb(220, 26, 26)", "rgb(204, 26, 220)", "rgb(255, 145, 0)", "rgb(0, 0, 0)", 'rgb(80, 0, 104)']
+
+    var offsetX = 0;
+    var offsetY = 0;
+    var realOriginX = width / 2 + offsetX;
+    var realOriginY = height / 2 + offsetY;
 
     // DRAWING THE GRAPH GRID
 
@@ -101,7 +102,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const xPos = x * squareSizeX + offsetX;
             ctx.beginPath();
-            ctx.strokeStyle = '#2b2b2b';
+            ctx.strokeStyle = '#666666';
             ctx.moveTo(xPos, 0);
             ctx.lineTo(xPos, height);
             ctx.stroke();
@@ -117,7 +118,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const yPos = y * squareSizeY + offsetY;
             ctx.beginPath();
-            ctx.strokeStyle = '#2b2b2b';
+            ctx.strokeStyle = '#666666';
             ctx.moveTo(0, yPos);
             ctx.lineTo(width, yPos);
             ctx.stroke();
@@ -128,10 +129,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
         /*
         ctx.beginPath();
-        ctx.arc(realOriginX, realOriginY, squareSizeX / 2, 0, 360);
+        ctx.arc(realOriginX, realOriginY, squareSizeX / 3, 0, 360);
         ctx.strokeStyle = 'rgb(26, 94, 220)';
         ctx.stroke();
         */
+        
 
         ctx.beginPath();
         ctx.moveTo((width / 2) + offsetX, height);
@@ -158,35 +160,41 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // DRAW DOTS
 
-    function plotPoint(x, y) {
+    function plotPoint(x, y, i) {
         const realCords = convertToCanvasCoords(x, y);
 
         ctx.beginPath();
         ctx.arc(realCords[0], realCords[1], squareSizeX / 4, 0, 360);
         ctx.lineWidth = 2;
-        ctx.strokeStyle = '#001aff';
+        ctx.strokeStyle = listOfColors[i];
         ctx.fillStyle = '#ffffff';
         ctx.fill();
         ctx.stroke();
-        ctx.lineWidth = 1;
+
     }
 
     // REFRESH THE STUIPD GRAPH
 
-    // Ok so idk what I was on when I wrote this but holy crap it sucks.
+    // Ok so idk what I was on when I wrote this but holy crap it's TUFF.
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    function drawLine(x1, y1, x2, y2) {
+    function drawLine(x1, y1, x2, y2, i) {
         let startingCords = convertToCanvasCoords(x1, y1);
         let endingCords = convertToCanvasCoords(x2, y2);
-        
+
+        let minXVisible = math.ceil((-amountOfSquaresX / 2) - (math.floor(offsetX / squareSizeX)))
+        let minYVisible = math.ceil((-amountOfSquaresY / 2) + (math.floor(offsetY / squareSizeY)))
+        let maxXVisible = math.ceil((amountOfSquaresX / 2) - (math.floor(offsetX / squareSizeX)))
+        let maxYVisible = math.ceil((amountOfSquaresY / 2) + (math.floor(offsetY / squareSizeY)))
+
         ctx.beginPath();
         ctx.lineWidth = 3;
         ctx.moveTo(startingCords[0], startingCords[1]);
         ctx.lineTo(endingCords[0], endingCords[1]);
-        ctx.strokeStyle = 'rgb(26, 94, 220)';
+        ctx.strokeStyle = listOfColors[i];
         ctx.stroke();
+
     }
     
 
@@ -198,15 +206,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
     refreshCanvas(1);
 
-    function graphLineFromInfo(information) {
+    function graphLineFromInfo(information, i) {
 
         let minXVisible = math.ceil((-amountOfSquaresX / 2) - (math.floor(offsetX / squareSizeX)))
         let minYVisible = math.ceil((-amountOfSquaresY / 2) + (math.floor(offsetY / squareSizeY)))
         let maxXVisible = math.ceil((amountOfSquaresX / 2) - (math.floor(offsetX / squareSizeX)))
         let maxYVisible = math.ceil((amountOfSquaresY / 2) + (math.floor(offsetY / squareSizeY)))
 
+        var indexOfColor = i - 1
+        while(indexOfColor > listOfColors.length - 1) {
+            indexOfColor = indexOfColor - (listOfColors.length - 1)
+        }
+        
+
         if (information[0] == 'point') {
-            plotPoint(information[1], information[2])
+            plotPoint(information[1], information[2], indexOfColor)
             return
         }
 
@@ -217,8 +231,9 @@ document.addEventListener('DOMContentLoaded', () => {
             const soThatJSdoesntKillMe = doMath(information[2]);
 
             let lastPoint = null
+            let lastSlope = null
 
-            let step = Math.max(0.01, 2 / squareSizeX);
+            let step = Math.max(0.1, 1 / squareSizeX);
 
             for(let x = minXVisible - 2; x <= maxXVisible; x += step) {
                         
@@ -240,8 +255,22 @@ document.addEventListener('DOMContentLoaded', () => {
                         continue
                     }
 
-                    drawLine(lastPoint[0], lastPoint[1], x, y)
+                    let slope = (lastPoint[1] - y) / (lastPoint[0] / x)
+
+                    if(lastSlope != null) {
+                        if(Math.abs(slope - lastSlope) <= 0.01) {
+                            lastSlope = slope
+                            //console.log(lastSlope)
+                            continue
+                        }
+
+                    }
+
+                    //plotPoint(x, y)
+                    drawLine(lastPoint[0], lastPoint[1], x, y, indexOfColor)
                     lastPoint = [x, y]
+                    lastSlope = slope
+                    //console.log(lastSlope)
                 } 
                 
                 catch (e) {
@@ -249,7 +278,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
 
             }
-
         }
     }
 
@@ -261,14 +289,22 @@ document.addEventListener('DOMContentLoaded', () => {
             const input = document.getElementById(`where_the_math_goes_${i}`);
 
             input.addEventListener("input", () => {
+
                 refreshCanvas(0)
+
+                if(input.value.toString().toUpperCase() == "Die Kuh".toUpperCase()) {
+                    let dieKuh = new Image()
+                    dieKuh.src = "../static/img/DieKueh.jpg"
+                    ctx.drawImage(dieKuh, 0, 0, width, height)
+                }
 
                 let information = getEquationTypeFromInput(input.value.toString())
 
                 if(information == "invalid") {return}
                 if(!(Array.isArray(information))) {return}
 
-                graphLineFromInfo(information)
+
+                graphLineFromInfo(information, i)
             
             });
         }
@@ -279,12 +315,18 @@ document.addEventListener('DOMContentLoaded', () => {
         for (let i = 1; i <= amountOfInserts; i++) {
             const input = document.getElementById(`where_the_math_goes_${i}`);
 
+            if(input.value.toString().toUpperCase() == "Die Kuh".toUpperCase()) {
+                let dieKuh = new Image()
+                dieKuh.src = "../static/img/DieKueh.jpg"
+                ctx.drawImage(dieKuh, 0, 0, width, height)
+            }
+
             let information = getEquationTypeFromInput(input.value.toString())
 
             if(information == "invalid") {return}
             if(!(Array.isArray(information))) {return}
 
-            graphLineFromInfo(information)
+            graphLineFromInfo(information, i)
         }
     }
 
@@ -356,7 +398,6 @@ document.addEventListener('DOMContentLoaded', () => {
     function onScrollOut() {
         baseSize = baseSize + 1;
         refreshCanvas(1);
-        console.log(baseSize);
     }
 
     function onScrollIn() {
@@ -364,7 +405,6 @@ document.addEventListener('DOMContentLoaded', () => {
             baseSize = baseSize - 1;
             refreshCanvas(-1);
         }
-        console.log(baseSize);
     }
 
     canvas.addEventListener('mousedown', onMouseDown);
