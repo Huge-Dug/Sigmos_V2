@@ -39,9 +39,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const rect = parent.getBoundingClientRect();
         const scale = 1;
 
-        canvas.style.width  = rect.width + 'px';
-        canvas.style.height = rect.height + 'px';
-
         canvas.width  = Math.floor(rect.width * scale);
         canvas.height = Math.floor(rect.height * scale);
 
@@ -51,7 +48,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     resizeCanvasToParent();
 
-    window.addEventListener('resize', resizeCanvasToParent);
+    window.addEventListener('resize', resizeCanvasToParent());
+    window.addEventListener('zoom', resizeCanvasToParent());
 
     // STUPID MATH THAT I HATE
 
