@@ -8,13 +8,14 @@ math.config({
 
 function doMath(mathToDo) {
 
-        mathToDo = mathToDo.replaceAll(' ', '')
-        mathToDo = mathToDo.replaceAll('mod', '%')
-        mathToDo = mathToDo.replaceAll('√', 'sqrt')
-        mathToDo = mathToDo.replaceAll('π', 'pi')
-
-        return mathToDo
+    mathToDo = mathToDo.replaceAll(' ', '')
+    mathToDo = mathToDo.replaceAll('mod', '%')
+    mathToDo = mathToDo.replaceAll('√', 'sqrt')
+    mathToDo = mathToDo.replaceAll('π', 'pi')
+    return mathToDo
 }
+
+var amountOfInserts = 1;
 
 document.addEventListener('DOMContentLoaded', () => {
 
@@ -24,8 +25,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const ctx = canvas.getContext('2d');
     const graph = document.getElementById("graphing-calc-canvas");
     const addNewItemButton = document.getElementById("add_new_item");
-
-    let amountOfInserts = 1;
 
     // RESIZE HANDLING
 
@@ -132,7 +131,6 @@ document.addEventListener('DOMContentLoaded', () => {
         ctx.stroke();
         */
         
-
         ctx.beginPath();
         ctx.moveTo((width / 2) + offsetX, height);
         ctx.lineTo((width / 2) + offsetX, 0);
@@ -176,8 +174,6 @@ document.addEventListener('DOMContentLoaded', () => {
         ctx.stroke();
 
     }
-
-    
 
     // REFRESH THE STUIPD GRAPH
 
@@ -234,6 +230,7 @@ document.addEventListener('DOMContentLoaded', () => {
             for (let x = minXVisible; x <= maxXVisible; x += step) {
 
                 let xEquation = soThatJSdoesntKillMe.replaceAll("x", "(" + x.toString() + ")");
+                
 
                 try {
                     let y = math.evaluate(xEquation);
@@ -261,55 +258,85 @@ document.addEventListener('DOMContentLoaded', () => {
                     previousPoint = null;
                 }
             }
+        }
+
+        else if (information[0] == "LSFX") {
+
+            const soThatJSdoesntKillMe = doMath(information[2]);
+
+            let step = Math.max(0.05, 1 / squareSizeX);
+
+            let previousPoint = null;
+
+            for (let y = minYVisible; y <= maxYVisible; y += step) {
+
+                let yEquation = soThatJSdoesntKillMe.replaceAll("y", "(" + y.toString() + ")");
+
+                try {
+                    let x = math.evaluate(yEquation);
+
+                    if (isNaN(x) || !isFinite(x)) {
+                        previousPoint = null;
+                        continue;
+                    }
+
+                    if (x < minYVisible - 5 || x > maxYVisible + 5) {
+                        previousPoint = null;
+                        continue;
+                    }
+
+                    if (previousPoint !== null) {
+                        //plotPoint(x, y, indexOfColor);
+                        drawLine(previousPoint[0], previousPoint[1], x, y, indexOfColor);
+                    }
+
+                    previousPoint = [x, y];
+
+                } 
+                
+                catch (e) {
+                    previousPoint = null;
+                }
+            }
 
         }
+
     }
 
     // INPUT HANDLING
 
     function readdListeners() {
-        for (let i = 1; i <= amountOfInserts; i++) {
             
-            const input = document.getElementById(`where_the_math_goes_${i}`);
+        const input = document.getElementById(`where_the_math_goes_${amountOfInserts}`);
 
-            input.addEventListener("input", () => {
+        input.addEventListener("input", () => {
 
-                refreshCanvas(0)
-
-                if(input.value.toString().toUpperCase() == "Die Kuh".toUpperCase()) {
-                    let dieKuh = new Image()
-                    dieKuh.src = "../static/img/DieKueh.jpg"
-                    ctx.drawImage(dieKuh, 0, 0, width, height)
-                }
-
-                let information = getEquationTypeFromInput(input.value.toString())
-
-                if(information == "invalid") {return}
-                if(!(Array.isArray(information))) {return}
-
-                graphLineFromInfo(information, i)
+            refreshCanvas(0);
             
-            });
-        }
+        });
     }    
     
     function itemCheck() {
         for (let i = 1; i <= amountOfInserts; i++) {
             const input = document.getElementById(`where_the_math_goes_${i}`);
 
-            if(input.value.toString().toUpperCase() == "Die Kuh".toUpperCase()) {
+            if(input.value.toString().toUpperCase().replace(/\s/g, "") == "DIEKUH") {
                 let dieKuh = new Image()
                 dieKuh.src = "../static/img/DieKueh.jpg"
                 ctx.drawImage(dieKuh, 0, 0, width, height)
+
+                return
             
             }
 
             let information = getEquationTypeFromInput(input.value.toString())
 
-            if(information == "invalid") {return}
-            if(!(Array.isArray(information))) {return}
+            if(information == "invalid") {continue}
+            if(!(Array.isArray(information))) {continue}
 
             graphLineFromInfo(information, i)
+
+            
         }
     }
 

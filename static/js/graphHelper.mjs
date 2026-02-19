@@ -89,11 +89,11 @@ export function getEquationTypeFromInput(equation) {
             }
 
             else if(containsY) {
-                return ["LSFYNX", sideWithY, sideWithNoY]
+                return ["LSFY", sideWithY, sideWithNoY]
             }
 
             else if(containsX) {
-                return ["LSFXNY", sideWithX, sideWithNoX]
+                return ["LSFX", sideWithX, sideWithNoX]
             }
      
         }
