@@ -156,6 +156,12 @@ document.addEventListener('DOMContentLoaded', () => {
         return [x, y];
     }
 
+    function convertToMathCoords(x, y) {
+        x = (x - realOriginX) / squareSizeX;
+        y = (realOriginY - y) / squareSizeY;
+        return [x, y];
+    }
+
     // DRAW DOTS
 
     function plotPoint(x, y, i) {
@@ -243,7 +249,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
 
                     if (previousPoint !== null) {
-
+                        //plotPoint(x, y, indexOfColor);
                         drawLine(previousPoint[0], previousPoint[1], x, y, indexOfColor);
                     }
 
