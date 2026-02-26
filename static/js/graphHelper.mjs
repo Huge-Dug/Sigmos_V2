@@ -52,7 +52,7 @@ export function getEquationTypeFromInput(equation) {
 
     if (eq.includes('=')) {
 
-        var eqSplit = eq.split('=');
+        var eqSplit = eq.split('='); 
 
         if (eqSplit.length > 2) { return 'invalid'; }
 

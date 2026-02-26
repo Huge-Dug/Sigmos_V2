@@ -1,10 +1,12 @@
+//import { re } from "mathjs";
 import { getEquationTypeFromInput } from "./graphHelper.mjs"; 
+import { startTheFight } from "./wyattBossFight.mjs";
 
 math.config({
   number: 'number'
 });
 
-
+var isFightingWyatt = false;
 
 function doMath(mathToDo) {
 
@@ -94,7 +96,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if(x % 4 == 0) {ctx.strokeStyle = '#000000'}
             else{ctx.strokeStyle = '#666666'}
             */
-
+           
             const xPos = x * squareSizeX + offsetX;
             ctx.beginPath();
             ctx.moveTo(xPos, 0);
@@ -132,14 +134,14 @@ document.addEventListener('DOMContentLoaded', () => {
         */
         
         ctx.beginPath();
-        ctx.moveTo((width / 2) + offsetX, height);
-        ctx.lineTo((width / 2) + offsetX, 0);
-        ctx.strokeStyle = 'rgb(0, 0, 0)';;
+        ctx.moveTo((width / 2) + (offsetX), 0);
+        ctx.lineTo((width / 2) + (offsetX), height);
+        ctx.strokeStyle = 'rgb(0, 0, 0)';
         ctx.stroke();
 
         ctx.beginPath();
-        ctx.moveTo(0, (height / 2) + offsetY);
-        ctx.lineTo(width, (height / 2) + offsetY);
+        ctx.moveTo(0, (height / 2) + (offsetY));
+        ctx.lineTo(width, (height / 2) + (offsetY));
         ctx.strokeStyle = 'rgb(0, 0, 0)';
         ctx.stroke();
 
@@ -320,13 +322,35 @@ document.addEventListener('DOMContentLoaded', () => {
         for (let i = 1; i <= amountOfInserts; i++) {
             const input = document.getElementById(`where_the_math_goes_${i}`);
 
+            if(input.value.toString().toUpperCase().replace(/\s/g, "") == "WYATT") {
+                isFightingWyatt = true;
+                offsetX = 0
+                offsetY = 0
+                baseSize = 20
+                
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                drawGrid(0);
+                canvas.style.cursor = "default"
+                startTheFight();
+
+                return
+            
+            }
+
             if(input.value.toString().toUpperCase().replace(/\s/g, "") == "DIEKUH") {
                 let dieKuh = new Image()
                 dieKuh.src = "../static/img/DieKueh.jpg"
                 ctx.drawImage(dieKuh, 0, 0, width, height)
 
-                return
-            
+                continue
+            }
+
+            if(input.value.toString().toUpperCase().replace(/\s/g, "") == "DIEKUHMITDIESTEIFENHUT") {
+                let dieKuh = new Image()
+                dieKuh.src = "../static/img/SteifenHut.png"
+                ctx.drawImage(dieKuh, 0, 0, width, height)
+
+                continue
             }
 
             let information = getEquationTypeFromInput(input.value.toString())
@@ -365,6 +389,7 @@ document.addEventListener('DOMContentLoaded', () => {
     graph.style.cursor = 'grab';
 
     function onMouseDown(event) {
+        if(isFightingWyatt) { return }
         rect = canvas.getBoundingClientRect();
         isDragging = true;
         originalXPos = event.clientX - rect.left;
@@ -376,7 +401,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     function onMouseMove(event) {
-        if (!isDragging) return;
+        if (!isDragging || isFightingWyatt) return;
 
         rect = canvas.getBoundingClientRect();
         const mouseX = event.clientX - rect.left;
@@ -400,17 +425,20 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function onMouseUp(event) {
+        if(isFightingWyatt) { return }
         isDragging = false;
         canvas.style.cursor = 'grab';
         itemCheck();
     }
 
     function onScrollOut() {
+        if(isFightingWyatt) { return }
         baseSize = baseSize + 1;
         refreshCanvas(1);
     }
 
     function onScrollIn() {
+        if(isFightingWyatt) { return }
         if (baseSize > 1) {
             baseSize = baseSize - 1;
             refreshCanvas(-1);
@@ -424,6 +452,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     canvas.addEventListener('wheel', (event) => {
         event.preventDefault();
+
+        if(isFightingWyatt) { return }
 
         if (event.deltaY > 0) {
             onScrollOut();
