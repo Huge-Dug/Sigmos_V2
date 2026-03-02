@@ -3,27 +3,29 @@ import * as Dialouge from "../dialouge/Wyatt.js"
 
 var canvas = document.getElementById('graphing-calc-canvas')
 var ctx = canvas.getContext('2d');
-var keysPressed = {}
+var graphingGraphThing = document.getElementById('graphingGraphThing');
+
+var keysPressed = {};
 var lastFrameTime = performance.now();
 
 var currentAttack = "Intro";
-var attacks = Array("ChickenPatty", "WeridThings")
+var attacks = Array("ChickenPatty", "WeridThings", "Highlighter")
 var attackAmount = 0;
+
 var items =[]
-var attackStartFrame = 0;
+
 var currentTaunt = null;
 
-var talkingSpeed = 2
-
-var hasPressedEnter = false;
+var attackStartFrame = 0;
 var generalAssumedFramesPerSecond = 30
 var currentFrame = 0;
-
-var graphingGraphThing = document.getElementById('graphingGraphThing');
+var fps = null;
+var painFrames = null;
+var painFramesCount = null;
 
 var temporarySpeech = ""
 
-var fps = null;
+
 
 var playerOrign = null;
 var playerImage = new Image();
@@ -33,6 +35,7 @@ var player = null;
 var wyattImage = new Image();
 wyattImage.src = "../static/img/WyattSprites/wyatt.png"
 var wyatt = null;
+var wyattPosition = null;
 
 export function startTheFight() {
 
@@ -56,9 +59,10 @@ export function startTheFight() {
     })
 
     playerOrign = {x: (canvas.width / 2), y: (canvas.height * (3 / 5) + (canvas.height / 8))}
-    player = new Objects.Player(playerOrign.x, playerOrign.y, 100, 3, canvas.width / 24, canvas.width / 24, playerImage)
+    player = new Objects.Player(playerOrign.x, playerOrign.y, 100, 0, canvas.width / 24, canvas.width / 24, playerImage)
 
     wyatt = new Objects.Enemy((canvas.width / 2) - canvas.width / 6, (canvas.height / 2) - canvas.width / 3, canvas.width / 3, canvas.width / 3, 67410, wyattImage)
+    
     lastFrameTime = performance.now();
     updateFrame()
 
@@ -74,6 +78,41 @@ function getFramesPerSecond() {
     return Math.round(fps);
     
 }
+
+function write(text, canSpeedUp = true, canSkip = true, isAnAction = false) {
+
+    if(!(temporarySpeech.length >= text.length)) {
+        if (keysPressed['shift'] && canSpeedUp) {
+            temporarySpeech = text
+        }
+
+    }
+
+    if (currentFrame % (2 * math.ceil(fps / generalAssumedFramesPerSecond)) == 0) {
+        temporarySpeech += text.charAt(temporarySpeech.length)
+    }
+
+    ctx.font = "20px Arial";
+    ctx.fillStyle = "white";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+
+    drawWrappedCenteredText(ctx, temporarySpeech, canvas.width / 2, canvas.height / 2, 400, 28);
+
+    if(keysPressed[' '] && isAnAction) {
+        temporarySpeech = ""
+        return "Done"
+    }
+
+    if (temporarySpeech.length >= text.length) {
+
+        if(keysPressed['enter'] && canSkip) {
+            temporarySpeech = ""
+            return "Done"
+        }
+    
+    }
+}
     
 function updateFrame() {
 
@@ -84,18 +123,19 @@ function updateFrame() {
         
     var box = new Objects.BoundingBox(boundingBoxStart[0], boundingBoxStart[1], boundingBoxSize[0], boundingBoxSize[1])
     box.draw(ctx)
+
     player.setBoundingBox(box)
 
     if (keysPressed['w']) player.move(0, -1)
     if (keysPressed['a']) player.move(-1, 0)
     if (keysPressed['s']) player.move(0, 1)
     if (keysPressed['d']) player.move(1, 0)
-    if (keysPressed['enter']) { hasPressedEnter = true }
 
     fps = getFramesPerSecond()
-    navbar.innerHTML = "<h1 style='color: #ffffff;' id='wyattTitle'>DUGMOS</h1><div style='color: #ffffff;' id='wyattHealth'>Wyatt's Health: " + fps + " | Your Health: " + player.getHealth() + "</div>"
+    navbar.innerHTML = "<h1 style='color: #ffffff;' id='wyattTitle'>DUGMOS</h1><div style='color: #ffffff;' id='wyattHealth'>Wyatt's Health: " + wyatt.getHealth() + " | Your Health: " + player.getHealth() + "</div>"
         
     player.draw(ctx)
+    player.updateSpeed((0.5 * (Math.ceil(fps / generalAssumedFramesPerSecond))))
     wyatt.draw(ctx)
     
     for (let i = items.length - 1; i >= 0; i--) {
@@ -115,7 +155,6 @@ function updateFrame() {
 
     currentFrame++
     
-
     attackLoop(currentFrame)
     
     requestAnimationFrame(updateFrame)
@@ -123,6 +162,7 @@ function updateFrame() {
 }
 
 function drawWrappedCenteredText(ctx, text, centerX, centerY, maxWidth, lineHeight) {
+
     const words = text.split(" ");
     let lines = [];
     let currentLine = words[0];
@@ -134,7 +174,7 @@ function drawWrappedCenteredText(ctx, text, centerX, centerY, maxWidth, lineHeig
         if (metrics.width > maxWidth) {
             lines.push(currentLine);
             currentLine = words[i];
-        } 
+        }
         
         else {
             currentLine = testLine;
@@ -155,40 +195,21 @@ function attackLoop(currentFrame) {
 
     if (currentAttack == "Intro") {
 
-        if(!(temporarySpeech.length >= Dialouge.introduction.length)) {
-            if (hasPressedEnter) {
-                temporarySpeech = Dialouge.introduction
-            }
-            hasPressedEnter = false;
+        if(write(Dialouge.introduction) == "Done") {
+            currentAttack = attacks[Math.floor(Math.random() * attacks.length)]
+            attackStartFrame = currentFrame + 10 * (Math.round(fps / generalAssumedFramesPerSecond))
         }
-            
         
-        if (currentFrame % (2 * math.round(fps / generalAssumedFramesPerSecond)) == 0) {
-            
-            temporarySpeech += Dialouge.introduction.charAt(temporarySpeech.length)
-        }
+    }
 
+    else if (currentAttack == "Player") {
 
-        ctx.font = "20px Arial";
-        ctx.fillStyle = "white";
-        ctx.textAlign = "center";
-        ctx.textBaseline = "middle";
-        
-        drawWrappedCenteredText(ctx, temporarySpeech, canvas.width / 2, canvas.height / 2, 400, 28);
-
-        if (temporarySpeech.length >= Dialouge.introduction.length) {
-
-            if (hasPressedEnter) {
-                currentAttack = attacks[Math.floor(Math.random() * attacks.length)]
-                attackStartFrame = currentFrame + 100
-                temporarySpeech = ""
-                hasPressedEnter = false
-            }
-
-            
+        if(write("(Press SPACE to attack!)", true, false, true) == "Done") {
+            wyatt.takeDamage(100)
+            currentAttack = "Taunt"
+            attackStartFrame = currentFrame + 10 * (Math.round(fps / generalAssumedFramesPerSecond))
         }
     }
-    
 
     else if (currentAttack == "ChickenPatty") {
         
@@ -203,20 +224,14 @@ function attackLoop(currentFrame) {
                 chickenPatty.image = chickenPattyImage
                 items.push(chickenPatty)
                 attackStartFrame += 16 * (Math.round(fps / generalAssumedFramesPerSecond))
-                console.log(fps)
                 attackAmount++
 
             }
 
             else {
-                
-                if(player.isInflated()) {
-                    
-                    player.deflate()
-                }
 
                 attackAmount = 0;
-                currentAttack = 'Taunt'
+                currentAttack = 'Player'
             }
         }
     }
@@ -232,10 +247,10 @@ function attackLoop(currentFrame) {
                 var weridTThingImage = new Image();
                 weridTThingImage.src = "../static/img/werid_thing.png"
 
-                var weridThing = new Objects.Projectile(0, canvas.width / 2 * (Math.random() * 2), 40 / (Math.round(fps / generalAssumedFramesPerSecond)), 1, ((Math.random() * 2) - 1) / 2, canvas.width / 32, canvas.width / 32, weridTThingImage, "WeridThing", 1)
+                var weridThing = new Objects.Projectile(0, canvas.width / 2 * (Math.random() * 2), 60 / (Math.round(fps / generalAssumedFramesPerSecond)), 1, ((Math.random() * 2) - 1) * (3/4), canvas.width / 32, canvas.width / 32, weridTThingImage, "WeridThing", 1)
                 weridThing.image = weridTThingImage
                 items.push(weridThing)
-                attackStartFrame += 10
+                attackStartFrame += 1 * (Math.ceil(fps / generalAssumedFramesPerSecond))
                 attackAmount++
 
             }
@@ -246,11 +261,43 @@ function attackLoop(currentFrame) {
                     
                     player.deflate()
                 }
+                
                 attackAmount = 0;
-                currentAttack = 'Taunt'
+                currentAttack = 'Player'
             }
         }
     }
+
+    else if(currentAttack == "Highlighter") {
+        if (currentFrame == attackStartFrame) {
+
+            if (attackAmount < 10) {
+
+                var highlighterImage = new Image();
+                highlighterImage.src = "../static/img/highlighter.png"
+
+                var highlighter = new Objects.Projectile(-canvas.width, player.y, 75 / (Math.round(fps / generalAssumedFramesPerSecond)), 1, 0, canvas.width / 4, canvas.width / 32, highlighterImage, "Highlighter", 15)
+                highlighter.image = highlighterImage
+                items.push(highlighter)
+                attackStartFrame += 25 * (Math.ceil(fps / generalAssumedFramesPerSecond))
+                attackAmount++
+
+            }
+
+            else {
+                
+                if(player.isInflated()) {
+                    
+                    player.deflate()
+                }
+                
+                attackAmount = 0;
+                currentAttack = 'Player'
+            }
+        }
+    }
+
+    
 
     else if(currentAttack == 'Taunt') {
 
@@ -258,41 +305,16 @@ function attackLoop(currentFrame) {
             currentTaunt = Dialouge.taunts[(Math.floor(Math.random() * Dialouge.taunts.length))]
         }
 
-        if(!(temporarySpeech.length >= currentTaunt.length)) {
-            if (hasPressedEnter) {
-                temporarySpeech = currentTaunt
-            }
-
-            hasPressedEnter = false;
-
-        }
-
-        if (currentFrame % (2 * math.round(fps / generalAssumedFramesPerSecond)) == 0) {
-            temporarySpeech += currentTaunt.charAt(temporarySpeech.length)
-        }
-
-        ctx.font = "20px Arial";
-        ctx.fillStyle = "white";
-        ctx.textAlign = "center";
-        ctx.textBaseline = "middle";
-
-        drawWrappedCenteredText(ctx, temporarySpeech, canvas.width / 2, canvas.height / 2, 400, 28);
-
-        if (temporarySpeech.length >= currentTaunt.length) {
-            if(hasPressedEnter) {
-                attackStartFrame = currentFrame + 100
-                temporarySpeech = ""
-                currentTaunt = null
-                attackAmount = 0;
-                hasPressedEnter = false;
-                currentAttack = attacks[Math.floor(Math.random() * attacks.length)]
-            }
+        if(write(currentTaunt) == "Done") {
+            currentTaunt = null
+            currentAttack = attacks[Math.floor(Math.random() * attacks.length)]
+            attackStartFrame = currentFrame + 10 * (Math.round(fps / generalAssumedFramesPerSecond))
         }
 
     }
 
     else {
-        alert("ERROR: UNKNOWN ATTACK " + currentAttack)
+        
     }
 
 }

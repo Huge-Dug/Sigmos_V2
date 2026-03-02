@@ -10,6 +10,7 @@ export class Player {
         this.boundingBox = null;
         this.inflated = false;
         this.inflationValue = 1.5;
+        this.inflationFactor = 0;
     }
 
     inflate() {
@@ -20,9 +21,9 @@ export class Player {
 
         this.sizeX *= this.inflationValue;
         this.sizeY *= this.inflationValue;
-        this.speed /= 5;
         this.x -= (this.sizeX / 6);
         this.y -= (this.sizeY / 6);
+        this.inflationFactor++
         this.inflated = true;
     }
 
@@ -32,6 +33,7 @@ export class Player {
         this.speed *= 5;
         this.x += (this.sizeX / 6);
         this.y += (this.sizeY / 6);
+        this.inflationFactor--
         this.inflated = false;
     }
 
@@ -63,12 +65,12 @@ export class Player {
         if (this.boundingBox) {
             var bounds = this.boundingBox.getBounds();
 
-            if (this.x + dx * this.speed < bounds.left || this.x + dx * this.speed + this.sizeX > bounds.right) {
-                dx = 0;
+            if ((this.x + dx * this.speed < bounds.left) || this.x + dx * this.speed + this.sizeX > bounds.right) {
+                dx *= -1;
             }
 
             if (this.y + dy * this.speed < bounds.top || this.y + dy * this.speed + this.sizeY > bounds.bottom) {
-                dy = 0;
+                dy *= -1;
             }
         }
 
@@ -105,6 +107,22 @@ export class Player {
 
     isInflated() {
         return this.inflated;
+    }
+
+    updateSpeed(speed) {
+
+        if(this.inflationFactor < 0) {
+            this.speed = speed * (5 * (this.inflationFactor * -1))
+        }
+
+        else if(this.inflationFactor > 0) {
+            this.speed = speed / (5 * (this.inflationFactor))
+        }
+
+        else {
+            this.speed = speed
+        }
+        
     }
 
 
