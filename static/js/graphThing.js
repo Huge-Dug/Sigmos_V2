@@ -432,8 +432,9 @@ document.addEventListener('DOMContentLoaded', () => {
     function onScrollOut() {
         if(isFightingWyatt) { return }
         baseSize = baseSize + 1;
-        offsetX = offsetX - (squareSizeX / 2)
-        offsetY = offsetY - (squareSizeY / 2)
+
+        offsetX += 1
+        offsetY += 1
         refreshCanvas(1);
     }
 
@@ -441,8 +442,8 @@ document.addEventListener('DOMContentLoaded', () => {
         if(isFightingWyatt) { return }
         if (baseSize > 1) {
             baseSize = baseSize - 1;
-            offsetX = offsetX + (squareSizeX / 2)
-            offsetY = offsetY + (squareSizeY / 2)
+            offsetX -= 1
+            offsetY -= 1
             refreshCanvas(-1);
         }
     }

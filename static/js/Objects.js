@@ -109,7 +109,7 @@ export class Player {
         return this.inflated;
     }
 
-    updateSpeed(speed) {
+    updateSpeed(speed, fps) {
 
         if(this.inflationFactor < 0) {
             this.speed = speed * (5 * (this.inflationFactor * -1))

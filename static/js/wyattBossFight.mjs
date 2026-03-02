@@ -25,8 +25,6 @@ var painFramesCount = null;
 
 var temporarySpeech = ""
 
-
-
 var playerOrign = null;
 var playerImage = new Image();
 playerImage.src = "../static/img/sigmos.png"
@@ -61,7 +59,7 @@ export function startTheFight() {
     playerOrign = {x: (canvas.width / 2), y: (canvas.height * (3 / 5) + (canvas.height / 8))}
     player = new Objects.Player(playerOrign.x, playerOrign.y, 100, 0, canvas.width / 24, canvas.width / 24, playerImage)
 
-    wyatt = new Objects.Enemy((canvas.width / 2) - canvas.width / 6, (canvas.height / 2) - canvas.width / 3, canvas.width / 3, canvas.width / 3, 67410, wyattImage)
+    wyatt = new Objects.Enemy((canvas.width / 2) - canvas.width / 6, (canvas.height / 2) - canvas.width / 3, canvas.width / 3, canvas.width / 3, 500, wyattImage)
     
     lastFrameTime = performance.now();
     updateFrame()
@@ -135,7 +133,7 @@ function updateFrame() {
     navbar.innerHTML = "<h1 style='color: #ffffff;' id='wyattTitle'>DUGMOS</h1><div style='color: #ffffff;' id='wyattHealth'>Wyatt's Health: " + wyatt.getHealth() + " | Your Health: " + player.getHealth() + "</div>"
         
     player.draw(ctx)
-    player.updateSpeed((0.5 * (Math.ceil(fps / generalAssumedFramesPerSecond))))
+    player.updateSpeed(Math.ceil((generalAssumedFramesPerSecond / fps)) * 5)
     wyatt.draw(ctx)
     
     for (let i = items.length - 1; i >= 0; i--) {
@@ -192,6 +190,20 @@ function drawWrappedCenteredText(ctx, text, centerX, centerY, maxWidth, lineHeig
 }
 
 function attackLoop(currentFrame) {
+
+    if(wyatt.getHealth() <= 0) {
+        if(write("Guh! You... you... defeated me, no this CAN'T BE!", false, false, false) == "Done") {
+            return
+        }
+        return
+    }
+
+    if(player.getHealth() <= 0) {
+        if(write("Well, THAT was easy!", false, false, false) == "Done") {
+            return
+        }
+        return
+    }
 
     if (currentAttack == "Intro") {
 
