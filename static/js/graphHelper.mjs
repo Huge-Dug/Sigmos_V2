@@ -35,6 +35,10 @@ export function getEquationTypeFromInput(equation) {
         }
     }
 
+    if(eq.includes("shape")) {
+        
+    }
+
     try {
         var points = eq.split(",")
         if (points.length == 2) {
@@ -44,6 +48,7 @@ export function getEquationTypeFromInput(equation) {
             
             return ['point', x, y]
         }
+
     }
 
     catch {

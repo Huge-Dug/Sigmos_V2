@@ -18,6 +18,7 @@ function doMath(mathToDo) {
 }
 
 var amountOfInserts = 1;
+var precision = 1 / 20
 
 document.addEventListener('DOMContentLoaded', () => {
 
@@ -205,6 +206,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function graphLineFromInfo(information, i) {
 
+        let dontEvenTryIt = false
+
+        if(dontEvenTryIt) {
+            return
+        }
+
         let minXVisible = math.ceil((-amountOfSquaresX / 2) - (math.floor(offsetX / squareSizeX))) - 1
         let minYVisible = math.ceil((-amountOfSquaresY / 2) + (math.floor(offsetY / squareSizeY))) - 1
         let maxXVisible = math.ceil((amountOfSquaresX / 2) - (math.floor(offsetX / squareSizeX))) + 1
@@ -221,11 +228,15 @@ document.addEventListener('DOMContentLoaded', () => {
             return
         }
 
+        if (information[0] == 'shape') {
+            amountOfPoints = information.length
+        }
+
         else if (information[0] == "LSFY") {
 
             const soThatJSdoesntKillMe = doMath(information[2]);
 
-            let step = Math.max(0.1, 1 / squareSizeX);
+            let step = precision;
 
             let previousPoint = null;
 
@@ -242,8 +253,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
 
                     if (y < minYVisible - 5 || y > maxYVisible + 5) {
-                        previousPoint = null;
-                        continue;
+                        dontEvenTryIt = true
                     }
 
                     if (previousPoint !== null) {
@@ -253,7 +263,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     previousPoint = [x, y];
 
-                } 
+                }
                 
                 catch (e) {
                     previousPoint = null;
@@ -265,7 +275,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const soThatJSdoesntKillMe = doMath(information[2]);
 
-            let step = Math.max(0.1, 1 / squareSizeX);
+            let step = Math.max(precision, 1 / squareSizeX);
 
             let previousPoint = null;
 
@@ -281,7 +291,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         continue;
                     }
 
-                    if (x < minYVisible - 5 || x > maxYVisible + 5) {
+                    if (x < minYVisible - (precision * 100) || x > maxYVisible + (precision * 100)) {
                         previousPoint = null;
                         continue;
                     }
@@ -432,9 +442,6 @@ document.addEventListener('DOMContentLoaded', () => {
     function onScrollOut() {
         if(isFightingWyatt) { return }
         baseSize = baseSize + 1;
-
-        offsetX += 1
-        offsetY += 1
         refreshCanvas(1);
     }
 
@@ -442,8 +449,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if(isFightingWyatt) { return }
         if (baseSize > 1) {
             baseSize = baseSize - 1;
-            offsetX -= 1
-            offsetY -= 1
             refreshCanvas(-1);
         }
     }

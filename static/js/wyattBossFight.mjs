@@ -149,6 +149,8 @@ function updateFrame() {
             items[i].destroy();
             
         }   
+
+        
     }
 
     currentFrame++
@@ -192,16 +194,12 @@ function drawWrappedCenteredText(ctx, text, centerX, centerY, maxWidth, lineHeig
 function attackLoop(currentFrame) {
 
     if(wyatt.getHealth() <= 0) {
-        if(write("Guh! You... you... defeated me, no this CAN'T BE!", false, false, false) == "Done") {
-            return
-        }
-        return
+       write("Guh! You... you... defeated me, no this CAN'T BE!", false, false, false)
+       return
     }
 
     if(player.getHealth() <= 0) {
-        if(write("Well, THAT was easy!", false, false, false) == "Done") {
-            return
-        }
+        write("Well, THAT was easy!", false, false, true)
         return
     }
 
@@ -288,7 +286,7 @@ function attackLoop(currentFrame) {
                 var highlighterImage = new Image();
                 highlighterImage.src = "../static/img/highlighter.png"
 
-                var highlighter = new Objects.Projectile(-canvas.width, player.y, 75 / (Math.round(fps / generalAssumedFramesPerSecond)), 1, 0, canvas.width / 4, canvas.width / 32, highlighterImage, "Highlighter", 15)
+                var highlighter = new Objects.Projectile(-canvas.width, player.y, 70 / (Math.round(fps / generalAssumedFramesPerSecond)), 1, 0, canvas.width / 4, canvas.width / 32, highlighterImage, "Highlighter", 15)
                 highlighter.image = highlighterImage
                 items.push(highlighter)
                 attackStartFrame += 25 * (Math.ceil(fps / generalAssumedFramesPerSecond))

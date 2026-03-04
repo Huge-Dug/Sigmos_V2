@@ -9,7 +9,7 @@ export class Player {
         this.image = image;
         this.boundingBox = null;
         this.inflated = false;
-        this.inflationValue = 1.5;
+        this.inflationValue = 1.2;
         this.inflationFactor = 0;
     }
 
@@ -21,18 +21,24 @@ export class Player {
 
         this.sizeX *= this.inflationValue;
         this.sizeY *= this.inflationValue;
-        this.x -= (this.sizeX / 6);
-        this.y -= (this.sizeY / 6);
+        
+        if(this.y + (this.sizeY / 2) >= this.boundingBox.getMiddle()[1]) {
+            this.y -= this.sizeY / 6
+        }
+
+        else {
+            this.y += this.sizeY / 6
+        }
         this.inflationFactor++
         this.inflated = true;
     }
 
     deflate() {
-        this.sizeX /= 1.5;
-        this.sizeY /= 1.5;
-        this.speed *= 5;
-        this.x += (this.sizeX / 6);
-        this.y += (this.sizeY / 6);
+        this.sizeX /= this.inflationValue;
+        this.sizeY /= this.inflationValue;
+        //this.speed *= 2.5;
+        this.x -= (this.sizeX / 6);
+        this.y -= (this.sizeY / 6);
         this.inflationFactor--
         this.inflated = false;
     }
@@ -66,11 +72,11 @@ export class Player {
             var bounds = this.boundingBox.getBounds();
 
             if ((this.x + dx * this.speed < bounds.left) || this.x + dx * this.speed + this.sizeX > bounds.right) {
-                dx *= -1;
+                dx *= 0;
             }
 
             if (this.y + dy * this.speed < bounds.top || this.y + dy * this.speed + this.sizeY > bounds.bottom) {
-                dy *= -1;
+                dy *= 0;
             }
         }
 
@@ -96,13 +102,18 @@ export class Player {
         };
 
         var otherBounds = {
-            left: other.x  + 5,
-            right: (other.x + other.sizeX) - 5,
-            top: other.y  + 5,
-            bottom: (other.y + other.sizeY) - 5
+            left: other.x,
+            right: (other.x + other.sizeX),
+            top: other.y,
+            bottom: (other.y + other.sizeY)
         };
         
         return !(playerBounds.right < otherBounds.left || playerBounds.left > otherBounds.right || playerBounds.bottom < otherBounds.top || playerBounds.top > otherBounds.bottom);
+    }
+
+    moveTo(x, y) {
+        this.x = x - (player.sizeX / 2)
+        this.y = y - (player.sizeY / 2)
     }
 
     isInflated() {
@@ -199,33 +210,33 @@ export class Platform {
 
 export class BoundingBox {
     
-    constructor(x, y, width, height) {
+    constructor(x, y, sizeX, sizeY) {
         this.x = x;
         this.y = y;
-        this.width = width;
-        this.height = height;
+        this.sizeX = sizeX;
+        this.sizeY = sizeY;
     }
 
     getBounds() {
         return {
             left: this.x,
-            right: this.x + this.width,
+            right: this.x + this.sizeX,
             top: this.y,
-            bottom: this.y + this.height
+            bottom: this.y + this.sizeY
         };
     }
 
     draw(ctx) {
         ctx.strokeStyle = "white";
         ctx.lineWidth = 2;
-        ctx.strokeRect(this.x, this.y, this.width, this.height);
+        ctx.strokeRect(this.x, this.y, this.sizeX, this.sizeY);
     }
 
     getMiddle() {
-        return {
-            x: this.x + this.width / 2,
-            y: this.y + this.height / 2
-        };
+        return [
+            this.x + this.sizeX / 2,
+            this.y + this.sizeY / 2
+        ]
     }
 
 }
