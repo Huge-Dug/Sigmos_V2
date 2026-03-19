@@ -9,7 +9,7 @@ export class Player {
         this.image = image;
         this.boundingBox = null;
         this.inflated = false;
-        this.inflationValue = 1.2;
+        this.inflationValue = 1.1;
         this.inflationFactor = 0;
     }
 
@@ -37,8 +37,14 @@ export class Player {
         this.sizeX /= this.inflationValue;
         this.sizeY /= this.inflationValue;
         //this.speed *= 2.5;
-        this.x -= (this.sizeX / 6);
-        this.y -= (this.sizeY / 6);
+        if(this.y + (this.sizeY / 2) >= this.boundingBox.getMiddle()[1]) {
+            this.y -= this.sizeY / 6
+        }
+
+        else {
+            this.y += this.sizeY / 6
+        }
+        
         this.inflationFactor--
         this.inflated = false;
     }
@@ -90,6 +96,10 @@ export class Player {
 
     getBoundingBox() {
         return this.boundingBox;
+    }
+
+    getPosition() {
+        return {x: this.x, y: this.y}
     }
 
     isColliding(other) {
@@ -162,6 +172,10 @@ export class Projectile {
         return { x: this.x, y: this.y };
     }
 
+    getDirection() {
+        return {x: this.directionX, y: this.directionY}
+    }
+
     draw(ctx) {
         if (this.image && this.image.complete) {
             ctx.drawImage(this.image, this.x, this.y, this.sizeX, this.sizeY);
@@ -180,6 +194,11 @@ export class Projectile {
 
     getDamage() {
         return this.damage;
+    }
+
+    changeDirection(x, y){
+        this.directionX = x
+        this.directionY = y
     }
 
 

@@ -9,7 +9,7 @@ var keysPressed = {};
 var lastFrameTime = performance.now();
 
 var currentAttack = "Intro";
-var attacks = Array("ChickenPatty", "WeridThings", "Highlighter")
+var attacks = Array("ChickenPatty", "WeridThings", "Highlighter", "Tiphead", "Tiphead", "Tiphead", "Tiphead", "Tiphead", "Tiphead", "Tiphead", "Tiphead", "Tiphead")
 var attackAmount = 0;
 
 var items =[]
@@ -24,6 +24,7 @@ var painFrames = null;
 var painFramesCount = null;
 
 var temporarySpeech = ""
+var currentSpeech = 0
 
 var playerOrign = null;
 var playerImage = new Image();
@@ -50,13 +51,14 @@ export function startTheFight() {
     
     document.addEventListener('keydown', (e) => {
         keysPressed[e.key.toLowerCase()] = true
+        console.log(e.key.toLowerCase())
     })
     
     document.addEventListener('keyup', (e) => {
         keysPressed[e.key.toLowerCase()] = false
     })
 
-    playerOrign = {x: (canvas.width / 2), y: (canvas.height * (3 / 5) + (canvas.height / 8))}
+    playerOrign = {x: (canvas.width / 2) - canvas.width / 48, y: (canvas.height * (3 / 5) + (canvas.height / 10))}
     player = new Objects.Player(playerOrign.x, playerOrign.y, 100, 0, canvas.width / 24, canvas.width / 24, playerImage)
 
     wyatt = new Objects.Enemy((canvas.width / 2) - canvas.width / 6, (canvas.height / 2) - canvas.width / 3, canvas.width / 3, canvas.width / 3, 1000, wyattImage)
@@ -79,15 +81,16 @@ function getFramesPerSecond() {
 
 function write(text, canSpeedUp = true, canSkip = true, isAnAction = false) {
 
-    if(!(temporarySpeech.length >= text.length)) {
-        if (keysPressed['shift'] && canSpeedUp) {
-            temporarySpeech = text
-        }
+    var stuffToActuallyWrite = text.replace("[stop]", "").replace("[next]", "")
 
+    if(!(temporarySpeech.length >= stuffToActuallyWrite)) {
+        if (keysPressed['shift'] && canSpeedUp) {
+            temporarySpeech = stuffToActuallyWrite
+        }
     }
 
     if (currentFrame % (2 * math.ceil(fps / generalAssumedFramesPerSecond)) == 0) {
-        temporarySpeech += text.charAt(temporarySpeech.length)
+        temporarySpeech += stuffToActuallyWrite.charAt(temporarySpeech.length)
     }
 
     ctx.font = "20px Arial";
@@ -102,14 +105,29 @@ function write(text, canSpeedUp = true, canSkip = true, isAnAction = false) {
         return "Done"
     }
 
-    if (temporarySpeech.length >= text.length) {
-
+    if (temporarySpeech.length >= stuffToActuallyWrite.length) {
         if(keysPressed['enter'] && canSkip) {
             temporarySpeech = ""
             return "Done"
         }
-    
     }
+}
+
+function taunt() {
+    let currentTaunt = Dialouge.taunts[currentSpeech]
+    if (write(currentTaunt, true, true, false) == "Done") {
+        if (currentTaunt.includes("[next]")) {
+            currentSpeech += 1
+            taunt()
+        }
+
+        else {
+            currentSpeech += 1
+            return "Done"
+        }
+        
+    }
+    
 }
     
 function updateFrame() {
@@ -117,7 +135,7 @@ function updateFrame() {
     ctx.clearRect(0, 0, canvas.width, canvas.height)
 
     var boundingBoxStart = [(canvas.width / 3), (canvas.height * (3 / 5))]
-    var boundingBoxSize = [canvas.width / 3, canvas.height / 4]
+    var boundingBoxSize = [canvas.width / 3, canvas.height / 3]
         
     var box = new Objects.BoundingBox(boundingBoxStart[0], boundingBoxStart[1], boundingBoxSize[0], boundingBoxSize[1])
     box.draw(ctx)
@@ -128,6 +146,10 @@ function updateFrame() {
     if (keysPressed['a']) player.move(-1, 0)
     if (keysPressed['s']) player.move(0, 1)
     if (keysPressed['d']) player.move(1, 0)
+    if (keysPressed['arrowup']) player.move(0, -1)
+    if (keysPressed['arrowleft']) player.move(-1, 0)
+    if (keysPressed['arrowdown']) player.move(0, 1)
+    if (keysPressed['arrowright']) player.move(1, 0)
 
     fps = getFramesPerSecond()
     navbar.innerHTML = "<h1 style='color: #ffffff;' id='wyattTitle'>DUGMOS</h1><div style='color: #ffffff;' id='wyattHealth'>Wyatt's Health: " + wyatt.getHealth() + " | Your Health: " + player.getHealth() + "</div>"
@@ -137,6 +159,24 @@ function updateFrame() {
     wyatt.draw(ctx)
     
     for (let i = items.length - 1; i >= 0; i--) {
+
+        if(items[i].getId() == "tiphead") {
+            let head = items[i]
+            let dx = -(head.getPosition()["x"] - player.getPosition()["x"])
+            let dy = -(head.getPosition()["y"] - player.getPosition()["y"])
+
+            let targetAngle = Math.atan2(dy, dx)
+            let currentAngle = Math.atan2(head.getDirection()["y"], head.getDirection()["x"])
+            let angleDifference = targetAngle - currentAngle
+
+            currentAngle += (angleDifference * .40)
+
+            head.changeDirection(Math.cos(currentAngle) + math.random(-1, 1), -Math.sin(currentAngle) + math.random(-1, 1))
+            if (currentAttack == "Taunt") {
+                items[i].destroy();
+            }
+        }
+
         items[i].update();
         items[i].draw(ctx);
         
@@ -148,9 +188,7 @@ function updateFrame() {
             player.takeDamage(items[i].getDamage());
             items[i].destroy();
             
-        }   
-
-        
+        }
     }
 
     currentFrame++
@@ -199,7 +237,15 @@ function attackLoop(currentFrame) {
     }
 
     if(player.getHealth() <= 0) {
-        write("Well, THAT was easy!", false, false, true)
+        if (write("Well, THAT was easy!", false, false, true) == "Done") {
+            wyatt.health = 1000
+            player.health = 100
+            currentAttack = "Intro"
+            currentSpeech = 0
+            if(player.isInflated()) {
+                player.deflate()
+            }
+        }
         return
     }
 
@@ -215,8 +261,15 @@ function attackLoop(currentFrame) {
     else if (currentAttack == "Player") {
 
         if(write("(Press SPACE to attack!)", true, false, true) == "Done") {
-            wyatt.takeDamage(100)
-            currentAttack = "Taunt"
+            wyatt.takeDamage((currentSpeech + 1) * 10)
+            if(wyatt.health <= 100) {
+                currentAttack = "Taunt"
+            }
+
+            else {
+                currentAttack = "Taunt"
+            }
+            
             attackStartFrame = currentFrame + 10 * (Math.round(fps / generalAssumedFramesPerSecond))
         }
     }
@@ -250,9 +303,7 @@ function attackLoop(currentFrame) {
         
         if (currentFrame == attackStartFrame) {
 
-            if (attackAmount < 75) {
-
-                console.log("CMing")
+            if (attackAmount < 50) {
 
                 var weridTThingImage = new Image();
                 weridTThingImage.src = "../static/img/werid_thing.png"
@@ -286,10 +337,40 @@ function attackLoop(currentFrame) {
                 var highlighterImage = new Image();
                 highlighterImage.src = "../static/img/highlighter.png"
 
-                var highlighter = new Objects.Projectile(-canvas.width, player.y, 70 / (Math.round(fps / generalAssumedFramesPerSecond)), 1, 0, canvas.width / 4, canvas.width / 32, highlighterImage, "Highlighter", 15)
+                var highlighter = new Objects.Projectile(-canvas.width, player.y, 60 / (Math.round(fps / generalAssumedFramesPerSecond)), 1, 0, canvas.width / 4, canvas.width / 32, highlighterImage, "Highlighter", 15)
                 highlighter.image = highlighterImage
                 items.push(highlighter)
                 attackStartFrame += 25 * (Math.ceil(fps / generalAssumedFramesPerSecond))
+                attackAmount++
+
+            }
+
+            else {
+                
+                if(player.isInflated()) {
+                    
+                    player.deflate()
+                }
+                
+                attackAmount = 0;
+                currentAttack = 'Player'
+            }
+        }
+    }
+
+    else if(currentAttack == "Tiphead") {
+        if (currentFrame == attackStartFrame) {
+
+            if (attackAmount < 10) {
+
+                var tipheadImage = new Image();
+                tipheadImage.src = "../static/img/tiphead.png"
+
+                var tiphead = new Objects.Projectile(canvas.width / 2, canvas.height / 4, 6 / (Math.round(fps / generalAssumedFramesPerSecond)), 1, 0, canvas.width / 16, canvas.width / 16, tipheadImage, "tiphead", 5)
+                tiphead.image = tipheadImage
+                items.push(tiphead)
+                
+                attackStartFrame += 60 * (Math.ceil(fps / generalAssumedFramesPerSecond))
                 attackAmount++
 
             }
@@ -311,17 +392,12 @@ function attackLoop(currentFrame) {
 
     else if(currentAttack == 'Taunt') {
 
-        if(currentTaunt == null) {
-            currentTaunt = Dialouge.taunts[(Math.floor(Math.random() * Dialouge.taunts.length))]
-        }
-
-        if(write(currentTaunt) == "Done") {
-            currentTaunt = null
+        if(taunt() == "Done") {
             currentAttack = attacks[Math.floor(Math.random() * attacks.length)]
             attackStartFrame = currentFrame + 10 * (Math.round(fps / generalAssumedFramesPerSecond))
         }
-
     }
+    
 
     else {
         

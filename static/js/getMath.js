@@ -5,6 +5,8 @@ math.config({
 
 document.addEventListener('DOMContentLoaded', () => {
 
+    var toggle = "DEG"
+
     const clear = document.getElementById('clear')
     const one = document.getElementById('one')
     const two = document.getElementById('two')
@@ -29,6 +31,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const division = document.getElementById('division')
     const leftParen = document.getElementById('left-paren')
     const rightParen = document.getElementById('right-paren')
+    const round = document.getElementById('round')
+    const degrad = document.getElementById('DEGRAD')
     const e = document.getElementById('e')
     const pi = document.getElementById('pi')
     const sin = document.getElementById('sin')
@@ -40,6 +44,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const log = document.getElementById('log')
     const ln = document.getElementById('ln')
     const mathInput = document.getElementById('math')
+
+
 
     let previousAnswer = localStorage.getItem('PreviousAnswer')
 
@@ -87,6 +93,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return math.smaller(math.abs(bn), eps) ? math.bignumber(0) : bn;
     }
 
+    
     if (clear) clear.addEventListener('click', () => {
         mathInput.value = ''
         mathInput.setAttribute("placeholder", previousAnswer ? "Previous Answer: " + previousAnswer : "0")
@@ -103,6 +110,27 @@ document.addEventListener('DOMContentLoaded', () => {
             mathInput.value += funcButton.innerText + '('
         })
     }
+
+    document.addEventListener('keydown', (e) => {
+        if(e.key.toLowerCase() == "enter") {
+            try {
+                let result = null
+                if(toggle == "RAD")
+                    result = makeGood(math.evaluate(doMath(("(" + mathInput.value.toString() + ") * pi / 180")))).toString()
+                else {
+                    result = makeGood(math.evaluate(doMath(mathInput.value))).toString()
+                }
+                
+                
+                checkForTuff(result)
+                setPreviousAnswer(result)
+            }      
+        
+            catch (error) {
+                alert("BOII TS BROKEN!")
+            }
+        }
+    })
 
     if (equal) equal.addEventListener('click', () => {
 
@@ -139,6 +167,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (division) division.addEventListener('click', () => {
         mathInput.value += '/'
+    })
+
+    if (round) round.addEventListener('click', () => {
+        mathInput.value = math.round(math.evaluate(mathInput.value), 2)
+        setPreviousAnswer(mathInput.value)
     })
 
 })

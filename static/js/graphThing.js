@@ -170,7 +170,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const realCords = convertToCanvasCoords(x, y);
 
         ctx.beginPath();
-        ctx.arc(realCords[0], realCords[1], squareSizeX / 4, 0, 360);
+        ctx.arc(realCords[0], realCords[1], squareSizeX / 8, 0, 360);
         ctx.lineWidth = 2;
         ctx.strokeStyle = listOfColors[i];
         ctx.fillStyle = '#ffffff';
@@ -204,6 +204,35 @@ document.addEventListener('DOMContentLoaded', () => {
 
     refreshCanvas(1);
 
+    function drawShape(listOfPoints, size = 1, offsetOfX = 0, offsetOfY = 0 , theColor) {
+        let amountOfPoints = listOfPoints.length
+
+        if (amountOfPoints < 1) {
+            return "invalid"
+        }
+
+        listOfPoints.push(listOfPoints[0])
+        let lastPoint = []            
+        let isFirst = true
+        for(let i = 0; i <= listOfPoints.length - 1; i++) {
+            
+            let theX = (math.evaluate(doMath(listOfPoints[i][0])) * math.evaluate(doMath(size.toString()))) + math.evaluate(doMath(offsetOfX.toString()))
+            let theY = (math.evaluate(doMath(listOfPoints[i][1])) * math.evaluate(doMath(size.toString()))) + math.evaluate(doMath(offsetOfY.toString()))
+        
+            plotPoint(theX, theY, theColor)
+                
+            if(!isFirst) {
+                drawLine(theX, theY, lastPoint[0], lastPoint[1])
+            }
+
+            lastPoint = [theX, theY]
+            isFirst = false
+                
+        }
+
+        //alert("dfsfsgssg")
+    }
+
     function graphLineFromInfo(information, i) {
 
         let dontEvenTryIt = false
@@ -227,9 +256,31 @@ document.addEventListener('DOMContentLoaded', () => {
             plotPoint(information[1], information[2], indexOfColor)
             return
         }
-
+        
         if (information[0] == 'shape') {
-            amountOfPoints = information.length
+            //alert(information[1])
+            drawShape(information[1], 1, 0, 0, indexOfColor)
+        }
+
+        else if (information[0] == 'square') {
+            document.getElementById(`where_the_math_goes_${indexOfColor + 1}`).value = "shape([-1,-1][-1,1][1,1][1,-1])"
+            refreshCanvas(0)
+        }
+
+        else if (information[0] == 'rtriangle') {
+            document.getElementById(`where_the_math_goes_${indexOfColor + 1}`).value = "shape([-1,0][1,0][1,2])"
+            refreshCanvas(0)
+        }
+
+
+        else if (information[0] == 'hghghg') {
+            document.getElementById(`where_the_math_goes_${indexOfColor + 1}`).value = "shape([-2,3][2,3][3,2][0,-1][-3,2])"
+            refreshCanvas(0)
+        }
+
+        else if (information[0] == 'cm') {
+            document.getElementById(`where_the_math_goes_${indexOfColor + 1}`).value = "shape([-2,3][2,3][3,2][0,-1][-3,2])"
+            refreshCanvas(0)
         }
 
         else if (information[0] == "LSFY") {
@@ -250,6 +301,16 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (isNaN(y) || !isFinite(y)) {
                         previousPoint = null;
                         continue;
+                    }
+
+                    if (y < minYVisible - (precision * 100) || y > maxYVisible + (precision * 100)) {
+                        previousPoint = null;
+                        //if null, then do NOT draw a line from the last good point, or else asymptotes will break
+                        continue;
+                    }
+
+                    if(previousPoint == null) {
+                        previousPoint = [x, y]
                     }
 
                     if (y < minYVisible - 5 || y > maxYVisible + 5) {
@@ -291,9 +352,17 @@ document.addEventListener('DOMContentLoaded', () => {
                         continue;
                     }
 
+                    
+
                     if (x < minYVisible - (precision * 100) || x > maxYVisible + (precision * 100)) {
                         previousPoint = null;
+                        //if null, then do NOT draw a line from the last good point, or else asymptotes will break
+
                         continue;
+                    }
+
+                    if(previousPoint == null) {
+                        previousPoint = [x, y]
                     }
 
                     if (previousPoint !== null) {

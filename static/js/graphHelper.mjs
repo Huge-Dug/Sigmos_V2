@@ -35,9 +35,38 @@ export function getEquationTypeFromInput(equation) {
         }
     }
 
-    if(eq.includes("shape")) {
-        
+    if(eq.includes("shape(")) {
+        let thePoints = eq.substring(6, eq.indexOf(")"))
+        //alert(thePoints)
+        let bruh = []
+        let startOfAPoint = 0
+        let endOfAPoint = 0
+        for(let j = 0; j < thePoints.length; j++) {
+            if(thePoints.substring(j, j + 1) == "[") {
+                startOfAPoint = j
+            }
+
+            if(thePoints.substring(j, j + 1) == "]") {
+                endOfAPoint = j
+                let theStuffBetween = thePoints.substring(startOfAPoint +  1, endOfAPoint)
+                let thePoint = theStuffBetween.split(",")
+                bruh.push(Array(thePoint[0], thePoint[1]))
+                
+            }
+
+        }
+          
+        return ["shape", bruh]
     }
+
+    if(eq.includes("square")) {
+        return ["square"]
+    }
+
+    if(eq.includes("rtriangle")) {
+        return ["rtriangle"]
+    }
+
 
     try {
         var points = eq.split(",")
