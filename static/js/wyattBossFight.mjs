@@ -9,7 +9,7 @@ var keysPressed = {};
 var lastFrameTime = performance.now();
 
 var currentAttack = "Intro";
-var attacks = Array("ChickenPatty", "WeridThings", "Highlighter", "Tiphead", "Tiphead", "Tiphead", "Tiphead", "Tiphead", "Tiphead", "Tiphead", "Tiphead", "Tiphead")
+var attacks = Array("ChickenPatty", "WeridThings", "Highlighter", "Tiphead")
 var attackAmount = 0;
 
 var items =[]
@@ -169,9 +169,11 @@ function updateFrame() {
             let currentAngle = Math.atan2(head.getDirection()["y"], head.getDirection()["x"])
             let angleDifference = targetAngle - currentAngle
 
-            currentAngle += (angleDifference * .40)
+            angleDifference = Math.atan2(Math.sin(angleDifference), Math.cos(angleDifference))
 
-            head.changeDirection(Math.cos(currentAngle) + math.random(-1, 1), -Math.sin(currentAngle) + math.random(-1, 1))
+            currentAngle += (angleDifference * .075)
+
+            head.changeDirection(Math.cos(currentAngle), Math.sin(currentAngle))
             if (currentAttack == "Taunt") {
                 items[i].destroy();
             }
@@ -366,7 +368,7 @@ function attackLoop(currentFrame) {
                 var tipheadImage = new Image();
                 tipheadImage.src = "../static/img/tiphead.png"
 
-                var tiphead = new Objects.Projectile(canvas.width / 2, canvas.height / 4, 6 / (Math.round(fps / generalAssumedFramesPerSecond)), 1, 0, canvas.width / 16, canvas.width / 16, tipheadImage, "tiphead", 5)
+                var tiphead = new Objects.Projectile(canvas.width / 2, canvas.height / 4, 12 / (Math.round(fps / generalAssumedFramesPerSecond)), 1, 0, canvas.width / 16, canvas.width / 16, tipheadImage, "tiphead", 5)
                 tiphead.image = tipheadImage
                 items.push(tiphead)
                 
