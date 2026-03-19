@@ -285,7 +285,7 @@ function attackLoop(currentFrame) {
                 var chickenPattyImage = new Image();
                 chickenPattyImage.src = "../static/img/ChickenPatty.png"
 
-                var chickenPatty = new Objects.Projectile((((canvas.width / 2) + (canvas.width / 4)) / (Math.random() * 2 + 1)), canvas.height / 8, 20 / (Math.round(fps / generalAssumedFramesPerSecond)) , 0, 1, canvas.width / 10, canvas.width / 10, chickenPattyImage, "ChickenPatty", 5)
+                var chickenPatty = new Objects.Projectile((((canvas.width / 2) + (canvas.width / 4)) / (Math.random() * 2 + 1)), canvas.height / 8, 20 / (Math.round(fps / generalAssumedFramesPerSecond)) , 0, 1, canvas.width / 15, canvas.width / 15, chickenPattyImage, "ChickenPatty", 5)
                 chickenPatty.image = chickenPattyImage
                 items.push(chickenPatty)
                 attackStartFrame += 16 * (Math.round(fps / generalAssumedFramesPerSecond))
@@ -310,7 +310,7 @@ function attackLoop(currentFrame) {
                 var weridTThingImage = new Image();
                 weridTThingImage.src = "../static/img/werid_thing.png"
 
-                var weridThing = new Objects.Projectile(0, canvas.width / 2 * (Math.random() * 2), 60 / (Math.round(fps / generalAssumedFramesPerSecond)), 1, ((Math.random() * 2) - 1) * (3/4), canvas.width / 32, canvas.width / 32, weridTThingImage, "WeridThing", 1)
+                var weridThing = new Objects.Projectile(0, canvas.width / 2 * (Math.random() * 2), 45 / (Math.round(fps / generalAssumedFramesPerSecond)), 1, ((Math.random() * 2) - 1) * (3/4), canvas.width / 32, canvas.width / 32, weridTThingImage, "WeridThing", 1)
                 weridThing.image = weridTThingImage
                 items.push(weridThing)
                 attackStartFrame += 1 * (Math.ceil(fps / generalAssumedFramesPerSecond))
@@ -332,6 +332,7 @@ function attackLoop(currentFrame) {
     }
 
     else if(currentAttack == "Highlighter") {
+
         if (currentFrame == attackStartFrame) {
 
             if (attackAmount < 10) {
