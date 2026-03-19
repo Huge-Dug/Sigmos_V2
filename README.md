@@ -9,5 +9,7 @@ so of course I had to create Sigmos_V2, the obviously better version. Hence, the
 
 ## Features:
 
-For now, it can do pretty basic math on the calculator, play phonk, and graph points, and graph basic lines is point-slope form (mostly correctly).
+For now, it can do pretty basic math on the calculator, play phonk, and graph points, and graph basic lines in point-slope form (mostly correctly)
+The graphing calculator can also draw shapes, which is pretty tuff
+Oh yeah and the in-progress RPG is pretty cool I guess.
 This features list will be longer soon I swear...
